@@ -40,8 +40,8 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Settings" style="@($"{(_isDarkTheme ? Colors.Brown.Default : Colors.Cyan.Default)}")" Size="Size.Large"
                                Title="Open the developer settings side panel"
                                OnClick="@(_ => _settingsOpen = !_settingsOpen)" />
-                <MudText Typo="Typo.h5" Class="align-self-center">
-                    Exclude Category:
+                <MudText Typo="Typo.h6" Class="align-self-center">
+                    Exclude:
                 </MudText>
                 
                 <MultiSelectAutoComplete T="string" @bind-Values="@Settings2.Overrides.ExcludeCategory"
