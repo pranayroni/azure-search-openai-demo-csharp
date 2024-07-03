@@ -38,10 +38,9 @@ internal static class WebApplicationExtensions
 
     private static IResult OnGetCategories(HttpContext context)
     {
-        var dataPath = "../../data/";
-        var subdirs = Directory.GetDirectories(dataPath);
-        var categories = subdirs.Select(Path.GetFileName).ToList();
+        // FIXME: this isn't even being used..?
 
+        var categories = new List<string> {"abbv", "knipper"}; // default cats
         return Results.Json(categories);
     }
 
@@ -133,16 +132,7 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(response);
     }
 
-    private static IResult OnGetCategories(HttpContext context)
-{
-    // var dataPath = "../../data/";
-    // var subdirs = Directory.GetDirectories(dataPath);
-    // var categories = subdirs.Select(Path.GetFileName).ToList();
-            // FIXME: testing hardcoded values for endpoint
-    var categories = new List<string> {"abbv", "knipper"};
- 
-    return Results.Json(categories);
-}
+
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
         BlobContainerClient client,
         [EnumeratorCancellation] CancellationToken cancellationToken)
