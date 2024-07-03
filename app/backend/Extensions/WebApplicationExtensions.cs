@@ -36,6 +36,15 @@ internal static class WebApplicationExtensions
         return app;
     }
 
+    private static IResult OnGetCategories(HttpContext context)
+    {
+        // FIXME: this isn't even being used..?
+
+        var categories = new List<string> {"abbv", "knipper"}; // default cats
+        return Results.Json(categories);
+    }
+
+
     private static IResult OnGetEnableLogout(HttpContext context)
     {
         var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
@@ -123,16 +132,7 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(response);
     }
 
-    private static IResult OnGetCategories(HttpContext context)
-{
-    // var dataPath = "../../data/";
-    // var subdirs = Directory.GetDirectories(dataPath);
-    // var categories = subdirs.Select(Path.GetFileName).ToList();
-            // FIXME: testing hardcoded values for endpoint
-    var categories = new List<string> {"abbv", "knipper"};
- 
-    return Results.Json(categories);
-}
+
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
         BlobContainerClient client,
         [EnumeratorCancellation] CancellationToken cancellationToken)
