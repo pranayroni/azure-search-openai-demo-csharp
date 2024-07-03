@@ -1,10 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Diagnostics;
+using Shared.Models;
+using PrepareDocs;
+using System.IO;
 
 s_rootCommand.SetHandler(
     async (context) =>
     {
+
         var options = GetParsedAppOptions(context);
         if (options.RemoveAll)
         {
@@ -236,10 +240,6 @@ static async Task<string> UploadBlobAsync(string fileName, string blobName, Blob
     var blobClient = container.GetBlobClient(blobName);
     var url = blobClient.Uri.AbsoluteUri;
 
-    if (await blobClient.ExistsAsync())
-    {
-        return url;
-    }
 
     var blobHttpHeaders = new BlobHttpHeaders
     {
