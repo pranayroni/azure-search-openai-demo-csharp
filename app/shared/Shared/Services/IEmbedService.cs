@@ -14,7 +14,8 @@ public interface IEmbedService
     Task<bool> EmbedPDFBlobAsync(
         Stream blobStream,
         string blobName,
-        string category);
+        string fileName,
+        string[] category);
 
     /// <summary>
     /// Embeds the given image blob into the embedding service.

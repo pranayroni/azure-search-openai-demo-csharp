@@ -14,7 +14,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
 {
     internal static DefaultAzureCredential DefaultCredential { get; } = new();
 
-    internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, string category, CancellationToken cancellationToken)
+    internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, string[] category, CancellationToken cancellationToken)
     {
         try
         {
@@ -29,7 +29,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
             string openAiEndpoint = "https://cog-r6lomx22dqabk.openai.azure.com/";
             string embeddingDeployment = "embedding";
             string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
-            string searchIndex = "gptkbindex";
+            string searchIndex = "gptkbindex2";
             string formRecognizerServiceEndpoint = "https://cog-fr-r6lomx22dqabk.cognitiveservices.azure.com/";
             string storageBlobEndpoint = "https://str6lomx22dqabk.blob.core.windows.net/";
 
@@ -123,7 +123,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                 }
                 // revert stream position
                 stream.Position = 0;
-                await embedService.EmbedPDFBlobAsync(stream, fileName, category);
+                await embedService.EmbedPDFBlobAsync(stream, fileName, fileName, category);
             }
 
             if (uploadedFiles.Count is 0)

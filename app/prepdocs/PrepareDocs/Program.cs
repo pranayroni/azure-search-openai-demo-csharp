@@ -4,6 +4,8 @@ using System.Diagnostics;
 using Shared.Models;
 using PrepareDocs;
 using System.IO;
+using Microsoft.Extensions.Options;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 s_rootCommand.SetHandler(
     async (context) =>
@@ -29,61 +31,77 @@ s_rootCommand.SetHandler(
             foreach (var subdir in subdirs)
             {
 
-                Matcher matcher = new();
-                var matcherStr = subdir + "/*.pdf";
-                Console.WriteLine("matcherStr: " + matcherStr);
-                // From bash, the single quotes surrounding the path (to avoid expansion of the wildcard), are included in the argument value.
-                matcher.AddInclude(matcherStr);
+                await ProcessDirectoryAsync(context, options, embedService, subdir);
 
-                var results = matcher.Execute(
-                    new DirectoryInfoWrapper(
-                        new DirectoryInfo(Directory.GetCurrentDirectory())));
-
-                var files = results.HasMatches
-                    ? results.Files.Select(f => f.Path).ToArray()
-                    : Array.Empty<string>();
-
-                context.Console.WriteLine($"Processing {files.Length} files...");
-
-                var tasks = Enumerable.Range(0, files.Length)
-                    .Select(i =>
-                    {
-                        var fileName = files[i];
-                        return ProcessSingleFileAsync(options, fileName, embedService);
-                    });
-
-                await Task.WhenAll(tasks);
-            }
-
-            
-
-            static async Task ProcessSingleFileAsync(AppOptions options, string fileName, IEmbedService embedService)
-            {
-                if (options.Verbose)
-                {
-                    options.Console.WriteLine($"Processing '{fileName}'");
-                }
-
-                if (options.Remove)
-                {
-                    await RemoveBlobsAsync(options, fileName);
-                    await RemoveFromIndexAsync(options, fileName);
-                    return;
-                }
-
-                if (options.SkipBlobs)
-                {
-                    return;
-                }
-
-                var category = Path.GetDirectoryName(fileName).Split('\\').Last();
-                Console.WriteLine("category/path(fileName): " + category);
-                await UploadBlobsAndCreateIndexAsync(options, fileName, embedService, category);
             }
         }
     });
 
 return await s_rootCommand.InvokeAsync(args);
+
+static async Task ProcessDirectoryAsync(InvocationContext context, AppOptions options,
+    IEmbedService embedService, string path)
+{
+    string[] files = Directory.GetFiles(path);
+    string[] directories = Directory.GetDirectories(path);
+    await ProcessFilesAsync(context, options, embedService, path);
+    foreach (string directory in directories)
+    {
+        await ProcessDirectoryAsync(context, options, embedService, directory);
+    }
+}
+
+static async Task ProcessFilesAsync(InvocationContext context, AppOptions options,
+    IEmbedService embedService, string path)
+{
+    Matcher matcher = new();
+    var matcherStr = path + "/*.pdf";
+    Console.WriteLine("matcherStr: " + matcherStr);
+    // From bash, the single quotes surrounding the path (to avoid expansion of the wildcard), are included in the argument value.
+    matcher.AddInclude(matcherStr);
+
+    var results = matcher.Execute(
+        new DirectoryInfoWrapper(
+            new DirectoryInfo(Directory.GetCurrentDirectory())));
+
+    var files = results.HasMatches
+        ? results.Files.Select(f => f.Path).ToArray()
+        : Array.Empty<string>();
+
+    context.Console.WriteLine($"Processing {files.Length} files...");
+
+    var tasks = Enumerable.Range(0, files.Length)
+    .Select(i =>
+    {
+            var fileName = files[i];
+            return ProcessSingleFileAsync(options, fileName, embedService);
+        });
+    await Task.WhenAll(tasks);
+}
+
+static async Task ProcessSingleFileAsync(AppOptions options, string fileName, IEmbedService embedService)
+{
+    if (options.Verbose)
+    {
+        options.Console.WriteLine($"Processing '{fileName}'");
+    }
+
+    if (options.Remove)
+    {
+        await RemoveBlobsAsync(options, fileName);
+        await RemoveFromIndexAsync(options, fileName);
+        return;
+    }
+
+    if (options.SkipBlobs)
+    {
+        return;
+    }
+
+    var category = Path.GetDirectoryName(fileName).Split("\\data\\").Last().Split('\\');
+    Console.WriteLine("category/path(fileName): " + string.Join(',',category));
+    await UploadBlobsAndCreateIndexAsync(options, fileName, embedService, category);
+}
 
 static async ValueTask RemoveBlobsAsync(
     AppOptions options, string? fileName = null)
@@ -175,7 +193,7 @@ static async ValueTask RemoveFromIndexAsync(
 }
 
 static async ValueTask UploadBlobsAndCreateIndexAsync(
-    AppOptions options, string fileName, IEmbedService embeddingService, string category)
+    AppOptions options, string fileName, IEmbedService embeddingService, string[] category)
 {
     var container = await GetBlobContainerClientAsync(options);
 
@@ -208,7 +226,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
 
                 // revert stream position
                 stream.Position = 0;
-                await embeddingService.EmbedPDFBlobAsync(stream, documentName, category);
+                await embeddingService.EmbedPDFBlobAsync(stream, documentName, fileName.Split('/').Last(), category);
             }
             finally
             {
@@ -231,7 +249,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
     {
         var blobName = BlobNameFromFilePage(fileName);
         await UploadBlobAsync(fileName, blobName, container);
-        await embeddingService.EmbedPDFBlobAsync(File.OpenRead(fileName), blobName, "image");
+        await embeddingService.EmbedPDFBlobAsync(File.OpenRead(fileName), blobName, fileName, ["image"]);
     }
 }
 

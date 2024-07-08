@@ -7,4 +7,4 @@ public readonly record struct Section(
     string Content,
     string SourcePage,
     string SourceFile,
-    string? Category = null);
+    string[]? Category = null);
