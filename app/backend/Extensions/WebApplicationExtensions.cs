@@ -7,6 +7,10 @@ using Newtonsoft;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Shared.Models;
+using Azure;
+using Microsoft.AspNetCore.Builder.Extensions;
+using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Indexes.Models;
 
 
 namespace MinimalApi.Extensions;
@@ -37,6 +41,9 @@ internal static class WebApplicationExtensions
         api.MapGet("enableLogout", OnGetEnableLogout);
 
         api.MapGet("categories", OnGetCategories);
+
+        api.MapPost("delete", OnPostDeleteAsync);
+
 
         return app;
     }
@@ -129,7 +136,7 @@ internal static class WebApplicationExtensions
         for(int i = 0; i < filesList.Count-1; i++){
             content.Add(filesList[i]);
         }
-        var category = filesList[filesList.Count-1].FileName;
+        var category = filesList[filesList.Count-1].FileName.Split(',');
         
         var response = await service.UploadFilesAsync(content, category, cancellationToken);
 
@@ -177,6 +184,112 @@ internal static class WebApplicationExtensions
             }
         }
     }
+
+    private static async Task<IResult> OnPostDeleteAsync(
+        DeleteRequest deleteRequest
+    )
+    {
+        var file = deleteRequest.file;
+
+        Console.WriteLine($"Trying to delete {file}");
+        await RemoveBlobsAsync(file);
+        await RemoveFromIndexAsync(file);
+
+        return TypedResults.Ok();
+    }
+
+    private static async ValueTask RemoveBlobsAsync(string fileName)
+    {
+        Console.WriteLine($"Removing blobs for '{fileName ?? "all"}'");
+
+
+        var prefix = fileName == null ? "": fileName.Split(".pdf").First();
+
+        Console.WriteLine("prefix: " + prefix);
+
+        DefaultAzureCredential defaultCredential = new DefaultAzureCredential();
+        string storageBlobEndpoint = "https://str6lomx22dqabk.blob.core.windows.net/";
+
+        var blobService = new BlobServiceClient(
+            new Uri(storageBlobEndpoint),
+            defaultCredential);
+
+        var getContainerClient = blobService.GetBlobContainerClient("content2");
+        var getCorpusClient = blobService.GetBlobContainerClient("corpus");
+        var clients = new[] { getContainerClient, getCorpusClient };
+
+        foreach (var client in clients)
+        {
+            await DeleteAllBlobsFromContainerAsync(client, prefix);
+        }
+
+        static async Task DeleteAllBlobsFromContainerAsync(BlobContainerClient client, string? prefix)
+        {
+            await foreach (var blob in client.GetBlobsAsync())
+            {
+                if (string.IsNullOrWhiteSpace(prefix) ||
+                    blob.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    await client.DeleteBlobAsync(blob.Name);
+                }
+            }
+        };
+    }
+
+    private static async ValueTask RemoveFromIndexAsync(string fileName)
+    {
+        var searchIndex = "gptkbindex2";
+        string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
+        DefaultAzureCredential defaultCredential = new DefaultAzureCredential();
+
+        var searchClient = new SearchClient(
+                new Uri(searchServiceEndpoint),
+                searchIndex,
+                defaultCredential);
+
+        Console.WriteLine($"""
+        Removing sections from '{fileName ?? "all"}' from search index '{searchIndex}.'
+        """);
+
+        while (true)
+        {
+            var filter = (fileName is null) ? null : $"sourcefile eq '{Path.GetFileName(fileName)}'";
+
+            var response = await searchClient.SearchAsync<SearchDocument>("",
+                new SearchOptions
+                {
+                    Filter = filter,
+                    Size = 1_000,
+                    IncludeTotalCount = true
+                });
+
+            var documentsToDelete = new List<SearchDocument>();
+            await foreach (var result in response.Value.GetResultsAsync())
+            {
+                documentsToDelete.Add(new SearchDocument
+                {
+                    ["id"] = result.Document["id"]
+                });
+            }
+
+            if (documentsToDelete.Count == 0)
+            {
+                break;
+            }
+            Response<IndexDocumentsResult> deleteResponse =
+                await searchClient.DeleteDocumentsAsync(documentsToDelete);
+            
+            Console.WriteLine($"""
+                Removed {deleteResponse.Value.Results.Count} sections from index
+            """);
+
+            // It can take a few seconds for search results to reflect changes, so wait a bit
+            await Task.Delay(TimeSpan.FromMilliseconds(2_000));
+        }
+    }
+
+
+
 
     private static async Task<IResult> OnPostImagePromptAsync(
         PromptRequest prompt,
