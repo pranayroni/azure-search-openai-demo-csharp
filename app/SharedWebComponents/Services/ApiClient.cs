@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http.Headers;
+using MinimalApi.Models;
 
 namespace SharedWebComponents.Services;
 
@@ -15,6 +16,13 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<ImageResponse>();
     }
+
+    public async Task RequestDeleteAsync(DeleteRequest request)
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            "api/delete", request, SerializerOptions.Default);
+        response.EnsureSuccessStatusCode();
+    } 
 
     public async Task<bool> ShowLogoutButtonAsync()
     {

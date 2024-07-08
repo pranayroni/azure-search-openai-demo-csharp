@@ -1,4 +1,5 @@
 ﻿@page "/documents"
+@inject NavigationManager manager
 
 <PageTitle>Documents</PageTitle>
 
@@ -144,6 +145,9 @@
                         Last Modified
                     </MudTableSortLabel>
                 </MudTh>
+                <MudTh Style="text-align:center">
+                    Delete
+                </MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Preview" Style="text-align:center">
@@ -179,6 +183,10 @@
                 </MudTd>
                 <MudTd DataLabel="Last Modified">
                     @($"{context.LastModified.GetValueOrDefault():G}")
+                </MudTd>
+                <MudTd DataLabel="Delete" Style="text-align:center">
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Delete"
+                            Size="Size.Small" OnClick="@(() => OnDeleteAsync(manager, context.Name))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>

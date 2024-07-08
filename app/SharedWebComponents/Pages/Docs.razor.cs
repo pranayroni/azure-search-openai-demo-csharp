@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using MinimalApi.Models;
+
 namespace SharedWebComponents.Pages;
 
 public sealed partial class Docs : IDisposable
@@ -105,6 +107,18 @@ public sealed partial class Docs : IDisposable
 
     private ValueTask OnShowDocumentAsync(DocumentResponse document) =>
         PdfViewer.ShowDocumentAsync(document.Name, document.Url.ToString());
+
+    private async ValueTask OnDeleteAsync(NavigationManager manager, string fileName)
+    {
+        var index = fileName.LastIndexOf("-");
+        fileName = fileName.Substring(0, index) + ".pdf";
+        DeleteRequest deleteRequest = new()
+        {
+            file = fileName
+        };
+        await Client.RequestDeleteAsync(deleteRequest);
+        manager.NavigateTo(manager.Uri, true);
+    }
 
     public void Dispose() => _cancellationTokenSource.Cancel();
 }
