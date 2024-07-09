@@ -37,6 +37,7 @@ public sealed class ApiClient(HttpClient httpClient)
         long maxAllowedSize,
         string cookie, string category)
     {
+        //httpClient.Timeout = TimeSpan.FromMinutes(1);
         try
         {
             using var content = new MultipartFormDataContent();
