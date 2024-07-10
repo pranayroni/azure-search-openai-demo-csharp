@@ -87,7 +87,7 @@
                     <MudButton StartIcon="@Icons.Material.Filled.Upload"
                                Variant="Variant.Filled"
                                Color="Color.Primary"
-                               Disabled=@(!FilesSelected || category == string.Empty)
+                               Disabled=@(!FilesSelected || _isUploadingDocuments || category == string.Empty)
                                Size="Size.Large" Class="ml-auto mr-2 mb-2"
                                OnClick="@(async _ => await SubmitFilesForUploadAsync())">
                         Upload File(s)

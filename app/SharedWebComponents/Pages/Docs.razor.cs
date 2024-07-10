@@ -12,6 +12,7 @@ public sealed partial class Docs : IDisposable
     private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private bool _isLoadingDocuments = false;
+    private bool _isUploadingDocuments = false;
     private string _filter = "";
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
@@ -69,10 +70,20 @@ public sealed partial class Docs : IDisposable
 
     private async Task SubmitFilesForUploadAsync()
     {
+        _isUploadingDocuments = true;
         if (_fileUpload is { Files.Count: > 0 })
         {
+            Snackbar.Add(
+                $"Uploading documents. " +
+                $"This may take a couple of minutes, please be patient. " +
+                $"You will not be able to upload additional documents during this time.",
+                Severity.Success,
+                static options =>
+                {
+                    options.ShowCloseIcon = true;
+                });
             var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-
+            
             var result = await Client.UploadDocumentsAsync(
                 _fileUpload.Files, MaxIndividualFileSize, cookie, category);
 
@@ -80,6 +91,7 @@ public sealed partial class Docs : IDisposable
 
             if (result.IsSuccessful)
             {
+                manager.NavigateTo(manager.Uri, true);
                 Snackbar.Add(
                     $"Uploaded {result.UploadedFiles.Length} documents.",
                     Severity.Success,
@@ -88,7 +100,7 @@ public sealed partial class Docs : IDisposable
                         options.ShowCloseIcon = true;
                         options.VisibleStateDuration = 10_000;
                     });
-
+                _isUploadingDocuments = false;
                 await _fileUpload.ResetAsync();
             }
             else
@@ -103,6 +115,7 @@ public sealed partial class Docs : IDisposable
                     });
             }
         }
+        _isUploadingDocuments = false;
     }
 
     private ValueTask OnShowDocumentAsync(DocumentResponse document) =>
@@ -112,12 +125,21 @@ public sealed partial class Docs : IDisposable
     {
         var index = fileName.LastIndexOf("-");
         fileName = fileName.Substring(0, index) + ".pdf";
+        Snackbar.Add(
+             $"Deleting {fileName}.",
+             Severity.Success,
+             static options =>
+             {
+                 options.ShowCloseIcon = true;
+                 options.VisibleStateDuration = 10_000;
+             });
         DeleteRequest deleteRequest = new()
         {
             file = fileName
         };
         await Client.RequestDeleteAsync(deleteRequest);
         manager.NavigateTo(manager.Uri, true);
+
     }
 
     public void Dispose() => _cancellationTokenSource.Cancel();
