@@ -37,7 +37,6 @@ public sealed class ApiClient(HttpClient httpClient)
         long maxAllowedSize,
         string cookie, string category)
     {
-        //httpClient.Timeout = TimeSpan.FromMinutes(10);
         try
         {
             using var content = new MultipartFormDataContent();
@@ -60,6 +59,9 @@ public sealed class ApiClient(HttpClient httpClient)
             // set cookie
             content.Headers.Add("X-CSRF-TOKEN-FORM", cookie);
             content.Headers.Add("X-CSRF-TOKEN-HEADER", cookie);
+
+
+            Console.WriteLine("Contents prepared, going to post");
 
             //COME BACK TO THIS
             //string json = JsonSerializer.Serialize(request);
@@ -85,6 +87,8 @@ public sealed class ApiClient(HttpClient httpClient)
     public async IAsyncEnumerable<DocumentResponse> GetDocumentsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        httpClient.Timeout = Timeout.InfiniteTimeSpan;
+
         var response = await httpClient.GetAsync("api/documents", cancellationToken);
 
         if (response.IsSuccessStatusCode)
