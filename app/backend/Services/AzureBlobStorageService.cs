@@ -29,7 +29,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
             string openAiEndpoint = "https://cog-r6lomx22dqabk.openai.azure.com/";
             string embeddingDeployment = "embedding";
             string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
-            string searchIndex = "gptkbindex2";
+            string searchIndex = "gptkbindex";
             string formRecognizerServiceEndpoint = "https://cog-fr-r6lomx22dqabk.cognitiveservices.azure.com/";
             string storageBlobEndpoint = "https://str6lomx22dqabk.blob.core.windows.net/";
 

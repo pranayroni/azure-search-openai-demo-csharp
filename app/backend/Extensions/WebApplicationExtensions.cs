@@ -214,7 +214,7 @@ internal static class WebApplicationExtensions
             new Uri(storageBlobEndpoint),
             defaultCredential);
 
-        var getContainerClient = blobService.GetBlobContainerClient("content2");
+        var getContainerClient = blobService.GetBlobContainerClient("content");
         var getCorpusClient = blobService.GetBlobContainerClient("corpus");
         var clients = new[] { getContainerClient, getCorpusClient };
 
@@ -238,7 +238,7 @@ internal static class WebApplicationExtensions
 
     private static async ValueTask RemoveFromIndexAsync(string fileName)
     {
-        var searchIndex = "gptkbindex2";
+        var searchIndex = "gptkbindex";
         string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
         DefaultAzureCredential defaultCredential = new DefaultAzureCredential();
 
