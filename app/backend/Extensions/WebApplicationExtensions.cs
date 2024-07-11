@@ -237,7 +237,7 @@ internal static class WebApplicationExtensions
 
     private static async ValueTask RemoveFromIndexAsync(string fileName)
     {
-        var searchIndex = "gptkbindex";
+        var searchIndex = "gptkbindex2";
         string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
         DefaultAzureCredential defaultCredential = new DefaultAzureCredential();
 
