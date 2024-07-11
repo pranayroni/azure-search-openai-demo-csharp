@@ -1,6 +1,6 @@
 ---
 page_type: sample
-languages:
+languages: 
 - azdeveloper
 - csharp
 - html
