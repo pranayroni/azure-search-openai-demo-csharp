@@ -39,9 +39,9 @@ public sealed class EmbeddingAggregateService(
             else if (Path.GetExtension(blobName) is ".pdf")
             {
                 logger.LogInformation("Embedding pdf: {Name}", blobName);
-                var category = Path.GetDirectoryName(blobName).Split('\\').Last();
+                var category = Path.GetDirectoryName(blobName).Split('\\');
                 Console.WriteLine("category/path(blobName): " + category);
-                var result = await embedService.EmbedPDFBlobAsync(blobStream, blobName, category);
+                var result = await embedService.EmbedPDFBlobAsync(blobStream, blobName, blobName, category);
 
                 var status = result switch
                 {
