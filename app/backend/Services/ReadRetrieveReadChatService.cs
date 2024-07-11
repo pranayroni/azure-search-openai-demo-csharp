@@ -74,17 +74,11 @@ public class ReadRetrieveReadChatService
 
         if (exclude_category_ienum != null)
         {
-            var exclude_category = exclude_category_ienum.ToList<string>();
+            var exclude_category = exclude_category_ienum.ToList();
             if (exclude_category != null && exclude_category.Count > 0)
             {
-                for (int i = 0; i < exclude_category.Count; i++)
-                {
-                    filter += $"category ne '{exclude_category[i]}'";
-                    if (i < exclude_category.Count - 1)
-                    {
-                        filter += " and ";
-                    }
-                }
+                var categoryFilters = exclude_category.Select(cat => $"not category/any(c: c eq '{cat}')");
+                filter = string.Join(" and ", categoryFilters);
             }
         }
         var chat = _kernel.GetRequiredService<IChatCompletionService>();

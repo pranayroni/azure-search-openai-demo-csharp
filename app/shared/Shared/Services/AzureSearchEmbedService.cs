@@ -31,7 +31,7 @@ public sealed partial class AzureSearchEmbedService(
     [GeneratedRegex("[^0-9a-zA-Z_-]")]
     private static partial Regex MatchInSetRegex();
 
-    public async Task<bool> EmbedPDFBlobAsync(Stream pdfBlobStream, string blobName, string category)
+    public async Task<bool> EmbedPDFBlobAsync(Stream pdfBlobStream, string blobName, string fileName, string[] category)
     {
         try
         {
@@ -49,7 +49,7 @@ public sealed partial class AzureSearchEmbedService(
                 await UploadCorpusAsync(corpusName, page.Text);
             }
 
-            var sections = CreateSections(pageMap, blobName, category);
+            var sections = CreateSections(pageMap, blobName, fileName, category);
 
             var infoLoggingEnabled = logger?.IsEnabled(LogLevel.Information);
             if (infoLoggingEnabled is true)
@@ -129,11 +129,11 @@ public sealed partial class AzureSearchEmbedService(
             },
             Fields =
             {
-                new SimpleField("id", SearchFieldDataType.String) { IsKey = true },
+                new SimpleField("id", SearchFieldDataType.String) { IsKey = true, IsFilterable = true },
                 new SearchableField("content") { AnalyzerName = LexicalAnalyzerName.EnMicrosoft },
-                new SearchField("category", SearchFieldDataType.String) { IsFacetable = true, IsFilterable = true },
-                new SimpleField("sourcepage", SearchFieldDataType.String) { IsFacetable = true },
-                new SimpleField("sourcefile", SearchFieldDataType.String) { IsFacetable = true },
+                new SearchField("category", SearchFieldDataType.Collection(SearchFieldDataType.String)) { IsFacetable = true, IsFilterable = true },
+                new SimpleField("sourcepage", SearchFieldDataType.String) { IsFacetable = true, IsFilterable = true },
+                new SimpleField("sourcefile", SearchFieldDataType.String) { IsFacetable = true, IsFilterable = true },
                 new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single))
                 {
                     VectorSearchDimensions = 1536,
@@ -317,7 +317,7 @@ public sealed partial class AzureSearchEmbedService(
     }
 
     public IEnumerable<Section> CreateSections(
-        IReadOnlyList<PageDetail> pageMap, string blobName, string category)
+        IReadOnlyList<PageDetail> pageMap, string blobName, string fileName, string[] category)
     {
         const int MaxSectionLength = 1_000;
         const int SentenceSearchLimit = 100;
@@ -388,13 +388,15 @@ public sealed partial class AzureSearchEmbedService(
             var sectionText = allText[start..end];
 
             Console.WriteLine($"[V1] Section given category: {category}");
+            Console.WriteLine($"[V1] Filename: {fileName}");
+
 
 
             yield return new Section(
                 Id: MatchInSetRegex().Replace($"{blobName}-{start}", "_").TrimStart('_'),
                 Content: sectionText,
                 SourcePage: BlobNameFromFilePage(blobName, FindPage(pageMap, start)),
-                SourceFile: blobName,
+                SourceFile: fileName,
                 Category: category );
 
             var lastTableStart = sectionText.LastIndexOf("<table", StringComparison.Ordinal);
@@ -425,11 +427,13 @@ public sealed partial class AzureSearchEmbedService(
         if (start + SectionOverlap < end)
         {
             Console.WriteLine($"[V2] Section given category: {category}");
+            Console.WriteLine($"[V2] Filename: {fileName}");
+
             yield return new Section(
                 Id: MatchInSetRegex().Replace($"{blobName}-{start}", "_").TrimStart('_'),
                 Content: allText[start..end],
                 SourcePage: BlobNameFromFilePage(blobName, FindPage(pageMap, start)),
-                SourceFile: blobName,
+                SourceFile: fileName,
                 Category: category);
         }
     }
@@ -456,7 +460,7 @@ public sealed partial class AzureSearchEmbedService(
         var batch = new IndexDocumentsBatch<SearchDocument>();
         foreach (var section in sections)
         {
-            if(section.Category == null || section.Category == string.Empty)
+            if(section.Category == null)
             {
                 Console.WriteLine($"Section category: {section.Category} & section is {section.Id}");
                 Environment.Exit(1);

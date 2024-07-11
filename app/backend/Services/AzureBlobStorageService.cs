@@ -14,7 +14,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
 {
     internal static DefaultAzureCredential DefaultCredential { get; } = new();
 
-    internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, string category, CancellationToken cancellationToken)
+    internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, string[] category, CancellationToken cancellationToken)
     {
         try
         {
@@ -86,15 +86,18 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                         ContentType = "image"
                     }, cancellationToken: cancellationToken);
                     uploadedFiles.Add(blobName);
+                    // revert stream position
+                    stream.Position = 0;
+                    await embedService.EmbedPDFBlobAsync(fileStream, blobName, fileName, category);
                 }
-                else if (Path.GetExtension(fileName).ToLower() is ".pdf")
+                else if (Path.GetExtension(fileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
                     using var documents = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
                     for (int i = 0; i < documents.PageCount; i++)
                     {
                         var documentName = BlobNameFromFilePage(fileName, i);
                         var blobClient = container.GetBlobClient(documentName);
-                        if (await blobClient.ExistsAsync(cancellationToken))
+                        if (await blobClient.ExistsAsync())
                         {
                             continue;
                         }
@@ -111,9 +114,13 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                             await blobClient.UploadAsync(tempStream, new BlobHttpHeaders
                             {
                                 ContentType = "application/pdf"
-                            }, cancellationToken: cancellationToken);
+                            });
 
                             uploadedFiles.Add(documentName);
+                            // revert stream position
+                            stream.Position = 0;
+                            tempStream.Position = 0;
+                            await embedService.EmbedPDFBlobAsync(tempStream, documentName, fileName, category);
                         }
                         finally
                         {
@@ -121,9 +128,6 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                         }
                     }
                 }
-                // revert stream position
-                stream.Position = 0;
-                await embedService.EmbedPDFBlobAsync(stream, fileName, category);
             }
 
             if (uploadedFiles.Count is 0)

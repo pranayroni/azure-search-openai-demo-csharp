@@ -1,0 +1,103 @@
+﻿@inject HttpClient Http
+
+<MudGrid Justify="Justify.Center">
+    <MudItem id="autocomplete" xs="12" Class="overflow-x-auto">
+        <MudAutocomplete T="string" @bind-Value="theValue" @bind-Text="_text"
+                     CoerceText SearchFunc="SearchFunc" OnKeyDown="EnterFunc"
+                     Variant="Variant.Outlined" AdornmentColor="Color.Default"
+                     ShowProgressIndicator="true" DebounceInterval="200" />
+    </MudItem>
+    <MudItem id="chipset" xs="12" Class="overflow-x-auto">
+
+        <MudChipSet AllClosable=true OnClose="RemoveValue" style="margin-left: 8px;">
+            @foreach (var val in selectedValues)
+            {
+                <MudChip Size=Size.Small Text="@(val)" Color="Color.Secondary" />
+            }
+        </MudChipSet>
+    </MudItem>
+</MudGrid>
+
+@code {
+    #nullable enable
+    [Parameter]
+    public IEnumerable<string>? Values { get; set; }
+#nullable restore
+    [Parameter]
+    public EventCallback<IEnumerable<string>> ValuesChanged { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+
+    [Parameter, EditorRequired]
+    public Func<string, Task<IEnumerable<string>>> SearchFunc { get; set; }
+
+    private HashSet<string> selectedValues = new HashSet<string>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (Values == null)
+        {
+            selectedValues.Clear();
+        }
+        else if (!Values.SequenceEqual(selectedValues))
+        {
+            selectedValues = Values.ToHashSet();
+            ValuesChanged.InvokeAsync(Values);
+        }
+    }
+
+    private void RefreshBinding()
+    {
+        Values = selectedValues.ToList();
+        ValuesChanged.InvokeAsync(Values);
+        StateHasChanged();
+    }
+
+    private void RemoveValue(MudChip chip)
+    {
+        if (selectedValues.RemoveWhere(x => x == chip.Text) > 0)
+            RefreshBinding();
+    }
+
+    private void AddValue(string newValue)
+    {
+        if (newValue != null)
+        {
+            if (selectedValues.Add(newValue))
+                RefreshBinding();
+        }
+    }
+
+    /// <summary>
+    /// Note that this is required to a) clear the control after you add
+    /// an item to the list, and b) to trigger the addvalue method.
+    /// If MudAutoComplete's bind-Value:after worked, we could get rid
+    /// of this and just clear the value after it was added.
+    /// </summary>
+    private string theValue
+    {
+        get => default(string);
+        set { AddValue(value); }
+    }
+
+    private string _text;
+    private void OnTextChanged(string text)
+    {
+        _text = text;
+    }
+
+    private void EnterFunc(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            foreach (var t in _text.Split(','))
+            {
+                AddValue(t.Trim());
+            }
+            _text = null;
+        }
+    }
+}

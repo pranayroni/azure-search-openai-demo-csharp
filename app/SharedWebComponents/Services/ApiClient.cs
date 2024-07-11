@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http.Headers;
+using MinimalApi.Models;
 
 namespace SharedWebComponents.Services;
 
@@ -15,6 +16,13 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<ImageResponse>();
     }
+
+    public async Task RequestDeleteAsync(DeleteRequest request)
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            "api/delete", request, SerializerOptions.Default);
+        response.EnsureSuccessStatusCode();
+    } 
 
     public async Task<bool> ShowLogoutButtonAsync()
     {
@@ -52,6 +60,9 @@ public sealed class ApiClient(HttpClient httpClient)
             content.Headers.Add("X-CSRF-TOKEN-FORM", cookie);
             content.Headers.Add("X-CSRF-TOKEN-HEADER", cookie);
 
+
+            Console.WriteLine("Contents prepared, going to post");
+
             //COME BACK TO THIS
             //string json = JsonSerializer.Serialize(request);
             //var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
@@ -76,6 +87,8 @@ public sealed class ApiClient(HttpClient httpClient)
     public async IAsyncEnumerable<DocumentResponse> GetDocumentsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        httpClient.Timeout = Timeout.InfiniteTimeSpan;
+
         var response = await httpClient.GetAsync("api/documents", cancellationToken);
 
         if (response.IsSuccessStatusCode)

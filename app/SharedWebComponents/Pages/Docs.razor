@@ -1,4 +1,5 @@
 ﻿@page "/documents"
+@inject NavigationManager manager
 
 <PageTitle>Documents</PageTitle>
 
@@ -70,9 +71,9 @@
                             </MudExpansionPanels>
                         </SelectedTemplate>
                     </MudFileUpload>
-                    <MudTextField T="string" Lines="1" Variant="Variant.Outlined"
-                             Label="Enter Category" Placeholder="Must Enter a Category" Class="pa-2"
-                             @bind-Value="category" Clearable="true" />
+                    <CustomMSAC @bind-Values="category" 
+                        SearchFunc="@CustomSearchFuncAsync" />
+                    
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton StartIcon="@Icons.Material.Filled.Clear"
@@ -86,7 +87,7 @@
                     <MudButton StartIcon="@Icons.Material.Filled.Upload"
                                Variant="Variant.Filled"
                                Color="Color.Primary"
-                               Disabled=@(!FilesSelected || category == string.Empty)
+                               Disabled=@(!FilesSelected || _isUploadingDocuments || category == null)
                                Size="Size.Large" Class="ml-auto mr-2 mb-2"
                                OnClick="@(async _ => await SubmitFilesForUploadAsync())">
                         Upload File(s)
@@ -144,6 +145,9 @@
                         Last Modified
                     </MudTableSortLabel>
                 </MudTh>
+                <MudTh Style="text-align:center">
+                    Delete
+                </MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Preview" Style="text-align:center">
@@ -179,6 +183,10 @@
                 </MudTd>
                 <MudTd DataLabel="Last Modified">
                     @($"{context.LastModified.GetValueOrDefault():G}")
+                </MudTd>
+                <MudTd DataLabel="Delete" Style="text-align:center">
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Delete"
+                            Size="Size.Small" OnClick="@(() => OnDeleteAsync(manager, context.Name))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
