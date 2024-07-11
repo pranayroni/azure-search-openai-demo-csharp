@@ -62,7 +62,7 @@ The repo includes sample data so it's ready to try end-to-end. In this sample ap
 
 ![RAG Architecture](docs/appcomponents.png)
 
-For more details on how this application was built, check out:
+For more details on how this application was built, check this out:
 
 - [Transform your business with smart .NET apps powered by Azure and ChatGPT blog post](https://aka.ms/build-dotnet-ai-blog)
 - [Build Intelligent Apps with .NET and Azure - Build Session](https://build.microsoft.com/sessions/f8f953f3-2e58-4535-92ae-5cb30ef2b9b0)
