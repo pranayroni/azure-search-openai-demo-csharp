@@ -2,10 +2,16 @@
 
 <MudGrid Justify="Justify.Center">
     <MudItem id="autocomplete" xs="12" Class="overflow-x-auto">
-        <MudAutocomplete T="string" @bind-Value="theValue" @bind-Text="_text"
-                     CoerceText SearchFunc="SearchFunc" OnKeyDown="EnterFunc"
-                     Variant="Variant.Outlined" AdornmentColor="Color.Default"
-                     ShowProgressIndicator="true" DebounceInterval="200" />
+        <MudTooltip Text="Create new categories by pressing Enter. Multiple categories are split by commas. Ex: Knipper, HR " Arrow="true" Placement="Placement.Bottom" RootClass="d-inline">
+            <div style="width: 100%">
+                <MudAutocomplete T="string" @bind-Value="theValue" @bind-Text="_text"
+                    CoerceText SearchFunc="SearchFunc" OnKeyDown="EnterFunc"
+                    Variant="Variant.Outlined" AdornmentColor="Color.Default"
+                    ShowProgressIndicator="true" DebounceInterval="200"
+                    Class="overflow-x-auto" />
+            </div>
+        </MudTooltip>
+
     </MudItem>
     <MudItem id="chipset" xs="12" Class="overflow-x-auto">
 
