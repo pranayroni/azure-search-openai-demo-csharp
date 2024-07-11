@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MinimalApi.Models;
+namespace Shared.Models;
 
 public class DeleteRequest
 {

@@ -116,7 +116,7 @@ param principalType string = 'User'
 param resourceGroupName string = 'rg-knipper-ai-docbot-csharp'
 
 @description('Name of the search index. Default: gptkbindex')
-param searchIndexName string = 'gptkbindex'
+param searchIndexName string = 'gptkbindex2'
 
 @description('Name of the Azure AI Search service')
 param searchServiceName string = ''
