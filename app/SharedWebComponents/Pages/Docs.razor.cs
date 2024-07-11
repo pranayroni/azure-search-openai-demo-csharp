@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using MinimalApi.Models;
+using Newtonsoft.Json.Linq;
 
 namespace SharedWebComponents.Pages;
 
@@ -11,6 +12,7 @@ public sealed partial class Docs : IDisposable
     private MudForm _form = null!;
     private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
+    private Task _getCategoriesTask = null!;
     private bool _isLoadingDocuments = false;
     private bool _isUploadingDocuments = false;
     private string _filter = "";
@@ -19,7 +21,10 @@ public sealed partial class Docs : IDisposable
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<DocumentResponse> _documents = [];
 
-    public string category = "";
+    public IEnumerable<string> category = new List<string>();
+    public List<string>? cList = null;
+    public string jsonResponse = string.Empty;
+
 
     [Inject]
     public required ApiClient Client { get; set; }
@@ -38,10 +43,12 @@ public sealed partial class Docs : IDisposable
 
     private bool FilesSelected => _fileUpload is { Files.Count: > 0 };
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         _getDocumentsTask = GetDocumentsAsync();
+    }
 
     private bool OnFilter(DocumentResponse document) => document is not null
         && (string.IsNullOrWhiteSpace(_filter) || document.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase));
@@ -85,7 +92,7 @@ public sealed partial class Docs : IDisposable
             var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
             
             var result = await Client.UploadDocumentsAsync(
-                _fileUpload.Files, MaxIndividualFileSize, cookie, category);
+                _fileUpload.Files, MaxIndividualFileSize, cookie, string.Join(',', category));
 
             Logger.LogInformation("Result: {x}", result);
 
@@ -140,6 +147,64 @@ public sealed partial class Docs : IDisposable
         await Client.RequestDeleteAsync(deleteRequest);
         manager.NavigateTo(manager.Uri, true);
 
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        category = new List<string>();
+        var httpClient = new HttpClient();
+        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //httpClient.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+        HttpRequestMessage request = new();
+        request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
+        request.Method = HttpMethod.Get;
+        request.Headers.Add("api-key", Environment.GetEnvironmentVariable("SEARCH_SERVICE_KEY") );
+        //request.Headers.Add("Access-Control-Allow-Origin", "*");
+
+        //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        var endpoint = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
+
+        try
+        {
+
+            // Assuming GetCategoriesAsync returns a List<string> or similar collection of category names.
+
+            HttpResponseMessage response = await httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                //jsonResponse = await response.Content.ReadAsStringAsync();
+                // Assuming the API returns a JSON array of strings.
+                //cList = JsonConvert.DeserializeObject<List<string>>(jsonResponse);
+                jsonResponse = await response.Content.ReadAsStringAsync();
+                var categories = JObject.Parse(jsonResponse)["@search.facets"]["category"]
+                    .Select(c => c["value"].ToString())
+                    .ToList();
+                cList = categories;
+            }
+            else
+            {
+                // Handle error or throw an exception
+                throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode} Message: {response.Content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching categories: {ex.Message}");
+            throw new Exception($"Error fetching categories: {ex.Message}");
+        }
+
+    }
+
+    public async Task<IEnumerable<string>> CustomSearchFuncAsync(string search)
+    {
+        if (string.IsNullOrEmpty(search))
+        {
+            return cList.AsEnumerable<string>();
+        }
+        return await Task.FromResult(cList.Where(x => x.Contains(search, StringComparison.OrdinalIgnoreCase)));
+        
     }
 
     public void Dispose() => _cancellationTokenSource.Cancel();
