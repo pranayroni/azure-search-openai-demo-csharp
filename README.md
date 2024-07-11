@@ -50,7 +50,7 @@ description: A csharp sample app that chats with your data using OpenAI and AI S
 - [Resources](#resources)
 - [FAQ](#faq)
 
-# ChatGPT + Enterprise data with Azure OpenAI and Cognitive Search (.NET)
+# ChatGPT+Enterprise data with Azure OpenAI and Cognitive Search (.NET)
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Azure-Samples/azure-search-openai-demo-csharp/dotnet-build.yml?label=BUILD%20%26%20TEST&logo=github&style=for-the-badge)
 [![Open in GitHub - Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=624102171&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
