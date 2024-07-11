@@ -135,16 +135,21 @@ public class AzureSearchService(SearchClient searchClient) : ISearchService
         CancellationToken cancellationToken = default)
     {
         var top = overrides?.Top ?? 3;
-        List<string> exclude_category = overrides?.ExcludeCategory.ToList<string>();
+        var exclude_category_ienum = overrides?.ExcludeCategory;
         var filter = string.Empty;
-        if (exclude_category != null && exclude_category.Count > 0)
+
+        if (exclude_category_ienum != null)
         {
-            for (int i = 0; i < exclude_category.Count; i++)
+            var exclude_category = exclude_category_ienum.ToList();
+            if (exclude_category != null && exclude_category.Count > 0)
             {
-                filter += $"category ne '{exclude_category[i]}'";
-                if (i < exclude_category.Count - 1)
+                for (int i = 0; i < exclude_category.Count; i++)
                 {
-                    filter += " and ";
+                    filter += $"category ne '{exclude_category[i]}'";
+                    if (i < exclude_category.Count - 1)
+                    {
+                        filter += " and ";
+                    }
                 }
             }
         }
