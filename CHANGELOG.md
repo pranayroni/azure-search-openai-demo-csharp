@@ -85,16 +85,3 @@
 * [#50](https://github.com/pranayroni/azure-search-openai-demo-csharp/pull/50): CI/CD Test: Updated Category select title
 
 
-## [project-title] Changelog
-
-<a name="x.y.z"></a>
-# x.y.z (yyyy-mm-dd)
-
-*Features*
-* ...
-
-*Bug Fixes*
-* ...
-
-*Breaking Changes*
-* ...
