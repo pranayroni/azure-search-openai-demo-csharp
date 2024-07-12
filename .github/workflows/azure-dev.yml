@@ -78,7 +78,8 @@ jobs:
         shell: pwsh
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
+      - name: Enable Resource Group Deployments
+        run: azd config set alpha.resourceGroupDeployments on
       - name: Provision Infrastructure
         run: azd provision --no-prompt --debug
         env:
