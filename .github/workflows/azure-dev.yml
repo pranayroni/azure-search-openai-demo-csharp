@@ -7,7 +7,7 @@ on:
         default: Manual run
   push:
     branches:
-      - main
+      - prod
 
 # https://learn.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#set-up-azure-login-with-openid-connect-authentication
 permissions:
