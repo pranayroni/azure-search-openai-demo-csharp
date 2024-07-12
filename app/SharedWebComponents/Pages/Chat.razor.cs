@@ -30,6 +30,14 @@ public sealed partial class Chat
         return OnAskClickedAsync();
     }
 
+    private async Task OnEnterKeyPressedAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await OnAskClickedAsync();
+        }
+    }
+
     private async Task OnAskClickedAsync()
     {
         if (string.IsNullOrWhiteSpace(_userQuestion))
