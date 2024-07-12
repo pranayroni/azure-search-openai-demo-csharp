@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Text;
 using Azure.Core;
+using Microsoft.Identity.Client;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Embeddings;
@@ -15,6 +17,7 @@ public class ReadRetrieveReadChatService
     private readonly IConfiguration _configuration;
     private readonly IComputerVisionService? _visionService;
     private readonly TokenCredential? _tokenCredential;
+    private readonly OpenAIClient _openAIClient;
 
     public ReadRetrieveReadChatService(
         ISearchService searchClient,
@@ -24,6 +27,7 @@ public class ReadRetrieveReadChatService
         TokenCredential? tokenCredential = null)
     {
         _searchClient = searchClient;
+        _openAIClient = client;
         var kernelBuilder = Kernel.CreateBuilder();
 
         bool useAzureOpenAI = (configuration["UseAOAI"] == "true");
@@ -42,7 +46,7 @@ public class ReadRetrieveReadChatService
         else
         {
             //var deployedModelName = configuration["AzureOpenAiChatGptDeployment"];
-            var deployedModelName = "chat";
+            var deployedModelName = "chat4o";
             ArgumentNullException.ThrowIfNullOrWhiteSpace(deployedModelName);
             //var embeddingModelName = configuration["AzureOpenAiEmbeddingDeployment"];
             var embeddingModelName = "embedding";
@@ -146,12 +150,12 @@ Knipper 2024 standard plan AND dental AND employee benefit.
         // step 3
         // put together related docs and conversation history to generate answer
         var answerChat = new ChatHistory(
-           "You are a system assistant who helps the company Knipper's employees with their questions. Be brief in your answer. " +
-           "First try to answer ONLY with the facts listed in the provided sources. " +
-           "Assume all provided sources are related to Knipper Health, and answer with the most recently relevant information. " +
-           "If there isn't enough information, politely express that the answer is not in the provided documents and then search the internet to provide an answer. " +
-           "If asking a clarifying question to the user would help, ask the question. For tabular information return it as an html table. " +
-           "Do not return markdown format. If the question is not in English, answer in the language used in the question.");
+            "You are a system assistant who helps the company employees with their questions. Be brief in your answer. " +
+            "Answer ONLY with the facts listed in the provided sources. " +
+            "If you cannot find the answer in the sources, reply with 'I don't know.'. " +
+            "If asking a clarifying question to the user would help, ask the question. " +
+            "For tabular information return it as an html table. Do not return markdown format. " +
+            "If the question is not in English, answer in the language used in the question.");
 
         // add chat history
         foreach (var message in history)
@@ -198,7 +202,7 @@ Don't put your answer between ```json and ```, return the json string directly. 
 
 You answer needs to be a json object with the following format.
 {{
-    ""answer"": // the answer to the question, add a source reference to the end of each sentence. e.g. Apple is a fruit [reference1.pdf][reference2.pdf]. If no source available, put the answer as I don't know.
+    ""answer"": // the answer to the question, add a source reference to the end of each sentence. e.g. Apple is a fruit [reference1.pdf][reference2.pdf]. If no source available, put the answer as 'I don't know.'
     ""thoughts"": // brief thoughts on how you came up with the answer, e.g. what sources you used, what you thought about, etc.
 }}";
             answerChat.AddUserMessage(prompt);
@@ -224,6 +228,27 @@ You answer needs to be a json object with the following format.
             var answerObject = JsonSerializer.Deserialize<JsonElement>(answerJson);
             ans = answerObject.GetProperty("answer").GetString() ?? throw new InvalidOperationException("Failed to get answer");
             thoughts = answerObject.GetProperty("thoughts").GetString() ?? throw new InvalidOperationException("Failed to get thoughts");
+            Console.WriteLine("ans = "+ans);
+            if(ans == "I don't know.")
+            {
+                Console.WriteLine("Entered I don't know branch");
+                var deploymentId = "chat4o";
+                var chatCompletionsOptions = GetChatCompletionsOptions(deploymentId, history);
+                var response = await _openAIClient.GetChatCompletionsStreamingAsync(
+                    chatCompletionsOptions, cancellationToken);
+
+                StringBuilder compiledResponse = new StringBuilder();
+                await foreach (var choices in response.WithCancellation(cancellationToken))
+                {
+                    if (choices.ContentUpdate is { Length: > 0 })
+                    {
+                        compiledResponse.Append(choices.ContentUpdate);
+                    }
+                }
+                ans = compiledResponse.ToString();
+                // Optionally, log the compiled response for debugging
+                Console.WriteLine("Compiled Response: " + ans);
+            }
         }
 
         // step 4
@@ -274,5 +299,37 @@ e.g.
             CitationBaseUrl: _configuration.ToCitationBaseUrl());
 
         return new ChatAppResponse(new[] { choice });
+    }
+
+    private ChatCompletionsOptions GetChatCompletionsOptions(string deploymentId, ChatMessage[] history)
+    {
+
+        ChatCompletionsOptions chatCompletionsOptions = new ChatCompletionsOptions
+        {
+            DeploymentName = deploymentId,
+            Messages = { new ChatRequestSystemMessage(
+                "You are a system assistant who helps the company employees with their questions. Be brief in your answer. " +
+                "Start your message with 'I could not find an answer in the provided documents. According to the internet, ' " +
+                "and then answer the question based on general knowlegde or the internet. " +
+                "If asking a clarifying question to the user would help, ask the question. " +
+                "If the question is not in English, answer in the language used in the question.")
+            }
+        };
+
+        foreach (var message in history)
+        {
+            if (message.IsUser)
+            {
+
+                chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(message.Content));
+            }
+            else
+            {
+                chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(message.Content));
+            }
+        }
+
+        return chatCompletionsOptions;
+
     }
 }

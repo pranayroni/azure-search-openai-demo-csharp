@@ -71,7 +71,7 @@ internal static class WebApplicationExtensions
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         //var deploymentId = config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
-        var deploymentId = "chat";
+        var deploymentId = "chat4o";
         var response = await client.GetChatCompletionsStreamingAsync(
             new ChatCompletionsOptions
             {
