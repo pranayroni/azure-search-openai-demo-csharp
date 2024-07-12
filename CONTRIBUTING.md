@@ -1,4 +1,4 @@
-# Contributing to the project
+# Contributing to the project 
 
 You can contribute to the repository with issues and pull requests (PRs). Simply
 filing issues for problems you encounter is a great way to contribute. Contributing
