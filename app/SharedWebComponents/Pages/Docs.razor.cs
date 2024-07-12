@@ -159,7 +159,7 @@ public sealed partial class Docs : IDisposable
         HttpRequestMessage request = new();
         request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
         request.Method = HttpMethod.Get;
-        request.Headers.Add("api-key", Environment.GetEnvironmentVariable("SEARCH_SERVICE_KEY") );
+        request.Headers.Add("api-key", "ARNSvbnPWMRETL0rcPw3VmB0T1Fhsa4fnCFSkTBSKwAzSeAMgWiZ");
         //request.Headers.Add("Access-Control-Allow-Origin", "*");
 
         //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
