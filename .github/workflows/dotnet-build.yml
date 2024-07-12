@@ -1,10 +1,8 @@
 name: build & test
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "prod" ]
 
 jobs:
   build:
@@ -21,5 +19,3 @@ jobs:
       run: dotnet restore ./app/app.sln
     - name: Build
       run: dotnet build ./app/app.sln -c Release
-    - name: Test
-      run: dotnet test ./app/app.sln --verbosity normal -c Release

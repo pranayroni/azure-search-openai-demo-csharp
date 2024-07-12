@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using MinimalApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Newtonsoft;
@@ -11,6 +10,7 @@ using Azure;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
+
 
 
 namespace MinimalApi.Extensions;
@@ -44,16 +44,14 @@ internal static class WebApplicationExtensions
 
         api.MapPost("delete", OnPostDeleteAsync);
 
-
         return app;
     }
 
     private static IResult OnGetCategories(HttpContext context)
     {
-        var dataPath = "../../data/";
-        var subdirs = Directory.GetDirectories(dataPath);
-        var categories = subdirs.Select(Path.GetFileName).ToList();
+        // FIXME: this isn't even being used..?
 
+        var categories = new List<string> {"abbv", "knipper"}; // default cats
         return Results.Json(categories);
     }
 
@@ -91,7 +89,7 @@ internal static class WebApplicationExtensions
                     new ChatRequestUserMessage(prompt.Prompt)
                 }
             }, cancellationToken);
-        
+
         await foreach (var choice in response.WithCancellation(cancellationToken))
         {
             if (choice.ContentUpdate is { Length: > 0 })
@@ -99,7 +97,7 @@ internal static class WebApplicationExtensions
                 yield return new ChatChunkResponse(choice.ContentUpdate.Length, choice.ContentUpdate);
             }
         }
-        Console.WriteLine("Prompt: "+ prompt.Prompt);
+        Console.WriteLine("Prompt: " + prompt.Prompt);
         await Task.Delay(1);
 
     }
@@ -144,6 +142,7 @@ internal static class WebApplicationExtensions
 
         return TypedResults.Ok(response);
     }
+
 
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
         BlobContainerClient client,
@@ -238,7 +237,7 @@ internal static class WebApplicationExtensions
 
     private static async ValueTask RemoveFromIndexAsync(string fileName)
     {
-        var searchIndex = "gptkbindex";
+        var searchIndex = "gptkbindex2";
         string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
         DefaultAzureCredential defaultCredential = new DefaultAzureCredential();
 
