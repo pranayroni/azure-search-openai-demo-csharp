@@ -99,7 +99,7 @@ public sealed partial class MainLayout
         request.Method = HttpMethod.Get;
       
       // FIXME : Doesn't work locally
-        request.Headers.Add("api-key", "ARNSvbnPWMRETL0rcPw3VmB0T1Fhsa4fnCFSkTBSKwAzSeAMgWiZ");
+        request.Headers.Add("api-key", "PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs");
       
  
         //request.Headers.Add("Access-Control-Allow-Origin", "*");
