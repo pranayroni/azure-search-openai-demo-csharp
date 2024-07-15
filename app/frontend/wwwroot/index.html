@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blazor 💜 OpenAI</title>
+    <title>Knipper AI</title>
     <base href="/" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
@@ -64,6 +64,21 @@
             }
             hljs.highlightAll();
         };
+    </script>
+    <script>
+        function addBeforeUnloadListener() {
+            window.addEventListener('beforeunload', beforeUnloadHandler);
+        }
+
+        function removeBeforeUnloadListener() {
+            window.removeEventListener('beforeunload', beforeUnloadHandler);
+        }
+
+        function beforeUnloadHandler(e) {
+            var confirmationMessage = 'Leaving will cause your uploads or deletions to fail. Are you sure you would like to leave?';
+            e.returnValue = confirmationMessage; // For most browsers
+            return confirmationMessage; // For some older browsers
+        }
     </script>
 </body>
 </html>
