@@ -45,7 +45,7 @@
       "value": "S0"
     },
     "principalId": {
-      "value": "6cf949e1-456f-4009-a8af-74b9f41d0d15"
+      "value": "${AZURE_PRINCIPAL_ID}"
     },
     "principalType": {
       "value": "${AZURE_PRINCIPAL_TYPE=User}"
