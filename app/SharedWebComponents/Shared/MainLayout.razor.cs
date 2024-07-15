@@ -95,7 +95,7 @@ public sealed partial class MainLayout
         //httpClient.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
         HttpRequestMessage request = new();
-        request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex2/docs?api-version=2024-05-01-preview&facet=category,count:1000");
+        request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
         request.Method = HttpMethod.Get;
       
       // FIXME : Doesn't work locally
@@ -106,7 +106,7 @@ public sealed partial class MainLayout
         
         //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var endpoint = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex2/docs?api-version=2024-05-01-preview&facet=category,count:1000");
+        var endpoint = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
 
         try
         {
