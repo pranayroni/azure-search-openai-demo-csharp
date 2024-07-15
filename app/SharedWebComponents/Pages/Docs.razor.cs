@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Newtonsoft.Json.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SharedWebComponents.Pages;
 
@@ -77,8 +78,12 @@ public sealed partial class Docs : IDisposable
     private async Task SubmitFilesForUploadAsync()
     {
         _isUploadingDocuments = true;
+        // Add the beforeunload event listener at the start of the upload process
+        await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
+
         if (_fileUpload is { Files.Count: > 0 })
         {
+            
             Snackbar.Add(
                 $"Uploading documents. " +
                 $"This may take a couple of minutes, please be patient. " +
@@ -89,14 +94,17 @@ public sealed partial class Docs : IDisposable
                     options.ShowCloseIcon = true;
                 });
             var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-            
+
+            var cancellationToken = _cancellationTokenSource.Token;
             var result = await Client.UploadDocumentsAsync(
-                _fileUpload.Files, MaxIndividualFileSize, cookie, string.Join(',', category));
+                _fileUpload.Files, MaxIndividualFileSize, cookie,
+                string.Join(',', category), cancellationToken);
 
             Logger.LogInformation("Result: {x}", result);
 
             if (result.IsSuccessful)
             {
+                await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
                 manager.NavigateTo(manager.Uri, true);
                 Snackbar.Add(
                     $"Uploaded {result.UploadedFiles.Length} documents.",
@@ -119,9 +127,11 @@ public sealed partial class Docs : IDisposable
                         options.ShowCloseIcon = true;
                         options.VisibleStateDuration = 10_000;
                     });
+                await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
+                _isUploadingDocuments = false;
             }
         }
-        _isUploadingDocuments = false;
+        
     }
 
     private ValueTask OnShowDocumentAsync(DocumentResponse document) =>
@@ -129,6 +139,7 @@ public sealed partial class Docs : IDisposable
 
     private async ValueTask OnDeleteAsync(NavigationManager manager, string fileName)
     {
+        await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
         var index = fileName.LastIndexOf("-");
         fileName = fileName.Substring(0, index) + ".pdf";
         Snackbar.Add(
@@ -143,7 +154,9 @@ public sealed partial class Docs : IDisposable
         {
             file = fileName
         };
-        await Client.RequestDeleteAsync(deleteRequest);
+        var cancellationToken = _cancellationTokenSource.Token;
+        await Client.RequestDeleteAsync(deleteRequest, cancellationToken);
+        await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
         manager.NavigateTo(manager.Uri, true);
 
     }
@@ -207,4 +220,6 @@ public sealed partial class Docs : IDisposable
     }
 
     public void Dispose() => _cancellationTokenSource.Cancel();
+    
+
 }

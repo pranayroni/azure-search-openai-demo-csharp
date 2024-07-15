@@ -185,7 +185,8 @@ internal static class WebApplicationExtensions
     }
 
     private static async Task<IResult> OnPostDeleteAsync(
-        DeleteRequest deleteRequest
+        DeleteRequest deleteRequest,
+        CancellationToken cancellationToken
     )
     {
         var file = deleteRequest.file;

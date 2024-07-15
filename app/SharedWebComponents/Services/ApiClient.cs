@@ -17,10 +17,11 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<ImageResponse>();
     }
 
-    public async Task RequestDeleteAsync(DeleteRequest request)
+    public async Task RequestDeleteAsync(
+        DeleteRequest request, CancellationToken cancellationToken)
     {
         var response = await httpClient.PostAsJsonAsync(
-            "api/delete", request, SerializerOptions.Default);
+            "api/delete", request, SerializerOptions.Default, cancellationToken);
         response.EnsureSuccessStatusCode();
     } 
 
@@ -35,7 +36,8 @@ public sealed class ApiClient(HttpClient httpClient)
     public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
         IReadOnlyList<IBrowserFile> files,
         long maxAllowedSize,
-        string cookie, string category)
+        string cookie, string category,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -66,7 +68,8 @@ public sealed class ApiClient(HttpClient httpClient)
             //COME BACK TO THIS
             //string json = JsonSerializer.Serialize(request);
             //var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("api/documents", content);
+            var response =
+                await httpClient.PostAsync("api/documents", content, cancellationToken);
 
 
             response.EnsureSuccessStatusCode();
