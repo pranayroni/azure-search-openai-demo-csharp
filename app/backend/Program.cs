@@ -14,7 +14,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
 builder.Services.AddAzureServices();
-builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
+// builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
 builder.Services.AddHttpClient();
 
 if (builder.Environment.IsDevelopment())
@@ -84,23 +84,23 @@ app.UseRouting();
 app.UseStaticFiles();
 app.UseCors();
 app.UseBlazorFrameworkFiles();
-app.UseAntiforgery();
+// app.UseAntiforgery();
 app.MapRazorPages();
 app.MapControllers();
 
-app.Use(next => context =>
-{
-    var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
-    var tokens = antiforgery.GetAndStoreTokens(context);
-    context.Response.Cookies.Append("XSRF-TOKEN", tokens?.RequestToken ?? string.Empty, new CookieOptions() { HttpOnly = false });
-    
-    // FIXME: Enable site embeddable, security risk for content security policy
-    // Remove the X-Frame-Options header entirely
-    context.Response.Headers.Remove("X-Frame-Options");
-    // Add or modify the Content-Security-Policy header
-    context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors *;");
-    return next(context);
-});
+// app.Use(next => context =>
+// {
+//     var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
+//     var tokens = antiforgery.GetAndStoreTokens(context);
+//     context.Response.Cookies.Append("XSRF-TOKEN", tokens?.RequestToken ?? string.Empty, new CookieOptions() { HttpOnly = false });
+//     
+//     // FIXME: Enable site embeddable, security risk for content security policy
+//     // Remove the X-Frame-Options header entirely
+//     context.Response.Headers.Remove("X-Frame-Options");
+//     // Add or modify the Content-Security-Policy header
+//     context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors *;");
+//     return next(context);
+// });
 app.MapFallbackToFile("index.html");
 
 app.MapApi();
