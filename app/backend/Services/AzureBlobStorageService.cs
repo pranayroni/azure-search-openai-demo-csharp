@@ -50,7 +50,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                     new AzureKeyCredential("PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs")),
                 documentAnalysisClient: new DocumentAnalysisClient(
                     new Uri(formRecognizerServiceEndpoint),
-                    defaultCredential,
+                    new AzureKeyCredential("6bc397d3d9c24c35b3b887ba567153ce"),
                     new DocumentAnalysisClientOptions
                     {
                         Diagnostics =
