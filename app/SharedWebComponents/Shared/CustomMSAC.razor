@@ -8,8 +8,8 @@
                     CoerceText SearchFunc="SearchFunc" OnKeyDown="EnterFunc"
                     Variant="Variant.Outlined" AdornmentColor="Color.Default"
                     ShowProgressIndicator="true" DebounceInterval="200" SelectValueOnTab="true"
-                    Clearable Placeholder="Add Categories" SelectOnActivation="false"
-                    Class="overflow-x-auto" />
+                    Clearable Placeholder="Add Categories" SelectOnClick="false"
+                    Class="overflow-x-auto" ResetValueOnEmptyText="true"/>
             </div>
         </MudTooltip>
 
@@ -88,7 +88,7 @@
     private string theValue
     {
         get => default(string);
-        set {  }
+        set { }
     }
 
     //private string _value;
@@ -102,12 +102,32 @@
     {
         if (args.Key == "Enter" && _text != string.Empty)
         {
-            //if _text does not generate
+
             foreach (var t in _text.Split(','))
             {
-                AddValue(t.Trim());
+                CallAddValue(t.Trim());
             }
             _text = null;
         }
+    }
+
+    private async void CallAddValue(string str)
+    {
+        var matches = await SearchFunc(str);
+        if (matches != null && matches.Count() > 0 &&
+            string.Equals(str, matches.First(), StringComparison.OrdinalIgnoreCase))
+        {
+            AddValue(matches.First());
+        }
+        else if (!Values.Any(s => s.Equals(str, StringComparison.OrdinalIgnoreCase)))
+        {
+            AddValue(str);
+        }
+    }
+
+    private Task ListItemOnClickAsync(string item)
+    {
+        AddValue(item);
+        return Task.CompletedTask;
     }
 }
