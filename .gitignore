@@ -494,3 +494,4 @@ ENV/
 /app/backend/Extensions/KeyVaultConfigurationBuilderExtensions.cs
 /app/backend/Properties/launchSettings.json
 .azure/rg-knipper-ai-docbot-csharp/.env
+/app/backend/Extensions/KeyVaultConfigurationBuilderExtensions.cs
