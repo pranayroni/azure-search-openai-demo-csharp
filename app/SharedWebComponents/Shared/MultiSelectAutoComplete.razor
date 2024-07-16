@@ -1,25 +1,20 @@
-﻿@inject HttpClient Http
+@inject HttpClient Http
 @typeparam T
 
-<MudGrid Justify="Justify.Center" class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
-    <MudItem>
-        <MudAutocomplete T="@T" @bind-Value="theValue" SearchFunc="SearchFunc"
-            ShowProgressIndicator="true" DebounceInterval="600"
-            Label="@Label" Clearable="true" Immediate="false"
-            Variant="Variant.Outlined" CoerceValue="true"
-            ToStringFunc="@GetNameFunc" AdornmentColor="Color.Default" />
-    </MudItem>
-    
-    <MudItem>
-        <MudChipSet AllClosable=true OnClose="RemoveValue" style="margin-left: 8px;">
-            @foreach (var val in selectedValues)
-            {
-                <MudChip Size=Size.Small Text="@GetNameFunc(val)" Color="Color.Secondary"/>
-            }
-        </MudChipSet>
-    </MudItem>
-    
-</MudGrid>
+<div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
+    <MudAutocomplete T="@T" @bind-Value="theValue" SearchFunc="SearchFunc"
+                     ShowProgressIndicator="true" DebounceInterval="600"
+                     Label="@Label" Clearable="true" Immediate="false"
+                     Variant="Variant.Outlined" CoerceValue="true"
+                     ToStringFunc="@GetNameFunc" AdornmentColor="Color.Default" />
+
+    <MudChipSet AllClosable=true OnClose="RemoveValue" style="margin-left: 8px;">
+        @foreach (var val in selectedValues)
+        {
+            <MudChip Size=Size.Small Text="@GetNameFunc(val)" Color="Color.Secondary"/>
+        }
+    </MudChipSet>
+</div>
 
 @code {
     #nullable enable

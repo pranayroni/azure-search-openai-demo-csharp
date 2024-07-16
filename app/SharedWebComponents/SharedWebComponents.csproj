@@ -25,12 +25,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shared\Shared\Shared.csproj" />
+    <Folder Include="wwwroot/" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Shared\MultiSelectAutoComplete.razor" />
-    <None Include="Shared\CustomMSAC.razor" />
+    <ProjectReference Include="../shared/Shared/Shared.csproj" />
   </ItemGroup>
 
+  <!-- <ItemGroup>
+    <UpToDateCheckInput Remove="shared/MultiSelectAutoComplete.razor" />
+  </ItemGroup> -->
+<!-- 
+  <ItemGroup>
+    <None Include="Shared\MultiSelectAutoComplete.razor" />
+    <None Include="Shared\CustomMSAC.razor" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="shared/MultiSelectAutoComplete.razor" />
+  </ItemGroup>
+ -->
 </Project>

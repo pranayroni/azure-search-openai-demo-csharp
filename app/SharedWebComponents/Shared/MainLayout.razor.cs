@@ -42,6 +42,7 @@ public sealed partial class MainLayout
 
     public RequestSettingsOverrides Settings2 { get; set; } = new();
 
+
     public List<string>? cList = null;
 
 
@@ -85,6 +86,7 @@ public sealed partial class MainLayout
         return await Task.FromResult(cList.Where(x => x.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
+
     protected override async Task OnInitializedAsync()
     {
         Settings2.Overrides.ExcludeCategory = new List<string>();
@@ -95,7 +97,11 @@ public sealed partial class MainLayout
         HttpRequestMessage request = new();
         request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
         request.Method = HttpMethod.Get;
-        request.Headers.Add("api-key", "ARNSvbnPWMRETL0rcPw3VmB0T1Fhsa4fnCFSkTBSKwAzSeAMgWiZ");
+      
+      // FIXME : Doesn't work locally
+        request.Headers.Add("api-key", "PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs");
+      
+ 
         //request.Headers.Add("Access-Control-Allow-Origin", "*");
         
         //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -111,6 +117,7 @@ public sealed partial class MainLayout
             if (response.IsSuccessStatusCode)
             {
                 //jsonResponse = await response.Content.ReadAsStringAsync();
+
                 // Assuming the API returns a JSON array of strings.
                 //cList = JsonConvert.DeserializeObject<List<string>>(jsonResponse);
                 jsonResponse = await response.Content.ReadAsStringAsync();
@@ -122,7 +129,7 @@ public sealed partial class MainLayout
             else
             {
                 // Handle error or throw an exception
-                throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode} Message: {response.Content}");
+                throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode}");
             }
         }
         catch (Exception ex)

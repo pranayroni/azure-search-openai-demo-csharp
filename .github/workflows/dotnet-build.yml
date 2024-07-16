@@ -1,0 +1,21 @@
+name: build & test
+
+on:
+  pull_request:
+    branches: [ "prod" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./app/app.sln
+    - name: Build
+      run: dotnet build ./app/app.sln -c Release
