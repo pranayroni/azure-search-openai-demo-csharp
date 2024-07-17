@@ -20,6 +20,7 @@ builder.Services.AddSessionStorageServices();
 builder.Services.AddSpeechSynthesisServices();
 builder.Services.AddSpeechRecognitionServices();
 builder.Services.AddSingleton<ITextToSpeechPreferencesListener, TextToSpeechPreferencesListenerService>();
+builder.Services.AddSingleton<ChatService>();
 builder.Services.AddMudServices();
 builder.Services.AddTransient<IPdfViewer, WebPdfViewer>();
 

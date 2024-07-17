@@ -9,7 +9,7 @@ public sealed partial class Chat
     private string _lastReferenceQuestion = "";
     private bool _isReceivingResponse = false;
 
-    private readonly Dictionary<UserQuestion, ChatAppResponseOrError?> _questionAndAnswerMap = [];
+    private Dictionary<UserQuestion, ChatAppResponseOrError?> _questionAndAnswerMap = [];
 
     [Inject] public required ISessionStorageService SessionStorage { get; set; }
 
@@ -23,6 +23,23 @@ public sealed partial class Chat
 
     [CascadingParameter(Name = nameof(IsReversed))]
     public required bool IsReversed { get; set; }
+
+    [Parameter]
+    public Guid ChatId { get; set; }
+
+    private ChatInstance _currentChat;
+
+    protected override void OnInitialized()
+    {
+        _currentChat = ChatService.GetChatInstanceById(ChatId);
+        _questionAndAnswerMap = _currentChat.ChatHistory;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        _currentChat = ChatService.GetChatInstanceById(ChatId);
+        _questionAndAnswerMap = _currentChat.ChatHistory;
+        await base.OnParametersSetAsync();
+    }
 
     private Task OnAskQuestionAsync(string question)
     {
