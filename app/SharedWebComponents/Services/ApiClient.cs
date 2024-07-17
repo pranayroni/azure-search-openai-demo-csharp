@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 // using Shared.Models;
 
 namespace SharedWebComponents.Services;
@@ -112,31 +113,26 @@ public sealed class ApiClient(HttpClient httpClient)
             }
         }
     }
-    public async IAsyncEnumerable<DocumentResponse> GetCategoriesAsync(
+    public async Task<List<string>> GetCategoriesAsync(
     [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/documents", cancellationToken);
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        var response = await httpClient.GetAsync("api/categories", cancellationToken);
 
         Console.WriteLine(response);
 
         if (response.IsSuccessStatusCode)
         {
-            var options = SerializerOptions.Default;
-
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-            Console.WriteLine(stream.ToString());
-            await foreach (var document in
-                JsonSerializer.DeserializeAsyncEnumerable<DocumentResponse>(stream, options, cancellationToken))
-            {
-                if (document is null)
-                {
-                    continue;
-                }
-
-                yield return document;
-            }
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            var categories = JsonSerializer.Deserialize<List<string>>(jsonResponse);
+            return categories;
         }
+        else
+        {
+            // Handle error or throw an exception
+            throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode}");
+        }
+
     }
 
     public Task<AnswerResult<ChatRequest>> ChatConversationAsync(ChatRequest request)

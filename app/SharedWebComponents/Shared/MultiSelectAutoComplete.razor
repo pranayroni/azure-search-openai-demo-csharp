@@ -10,7 +10,7 @@
             ToStringFunc="@GetNameFunc" AdornmentColor="MudBlazor.Color.Default" />
     </MudItem>
     
-    <MudItem xs="6" class="mt-2">
+    <MudItem xs="6" class="mt-3">
         <MudGrid Justify="Justify.FlexStart" >
             @if(calculateRows() > 2)
             {
@@ -31,9 +31,9 @@
             <MudPopover Open="@showCategoryManager" Fixed="true" Class="px-4 pt-4" OverflowBehavior="OverflowBehavior.FlipAlways"
                 AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
                 <MudGrid Justify="Justify.FlexStart">
-                    @foreach (var val in selectedValues)
+                    @for (int i = maxVisibleItems; i < selectedValues.Count; i++)
                     {
-                        <MudChip OnClose="RemoveValue" Size=MudBlazor.Size.Small Text="@GetNameFunc(val)" Color="MudBlazor.Color.Secondary" class="mb-1" />
+                        <MudChip OnClose="RemoveValue" Size=MudBlazor.Size.Small Text="@GetNameFunc(selectedValues.ElementAt(i))" Color="MudBlazor.Color.Secondary" class="mb-1" />
                     }
                 </MudGrid>
                 <MudButton OnClick="CloseCategoryManager" Class="ml-auto mr-n3 mb-1 mt-3" Color="MudBlazor.Color.Error">Close</MudButton>
@@ -115,7 +115,7 @@
         {
             var newWidth = EstimateStringWidthInEms(GetNameFunc(values[i])) + 4;
             totalWidth = Sum(widthsInRow);
-            if(newWidth > 12)
+            if(newWidth > 15)
             {
                 rows += 2;
                 widthsInRow.Clear();
