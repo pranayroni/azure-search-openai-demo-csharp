@@ -89,7 +89,7 @@ public class ReadRetrieveReadChatService
         var embedding = _kernel.GetRequiredService<ITextEmbeddingGenerationService>();
         float[]? embeddings = null;
         var question = history.LastOrDefault(m => m.IsUser)?.Content is { } userQuestion
-            ? userQuestion
+            ? userQuestion.Replace("knipper", string.Empty)
             : throw new InvalidOperationException("Use question is null");
 
         question += " 2024";
