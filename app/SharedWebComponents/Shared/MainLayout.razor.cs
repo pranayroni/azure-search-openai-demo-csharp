@@ -74,8 +74,28 @@ public sealed partial class MainLayout
 
     private void OnIsReversedChanged() => _isReversed = !_isReversed;
 
-    public List<string> _items = new List<string>() { "Abbvie", "Agile", "BioHaven" };
-    public string jsonResponse = string.Empty;
+    protected override void OnInitialized()
+    {
+        // Instead of awaiting this async enumerable here, let's capture it in a task
+        // and start it in the background. This way, we can await it in the UI.
+        Settings2.Overrides.ExcludeCategory = new List<string>();
+        _getCategoriesTask = GetCategoriesAsync();
+    }
+
+    private async Task GetCategoriesAsync()
+    {
+        _isLoadingCategories = true;
+
+        try
+        {
+            cList = await Client.GetCategoriesAsync(_cancellationTokenSource.Token);
+        }
+        finally
+        {
+            _isLoadingCategories = false;
+            StateHasChanged();
+        }
+    }
 
     public async Task<IEnumerable<string>> MySearchFuncAsync(string search)
     {
@@ -84,60 +104,6 @@ public sealed partial class MainLayout
             return cList.AsEnumerable<string>();
         }
         return await Task.FromResult(cList.Where(x => x.Contains(search, StringComparison.OrdinalIgnoreCase)));
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        Settings2.Overrides.ExcludeCategory = new List<string>();
-        var httpClient = new HttpClient();
-        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //httpClient.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-        HttpRequestMessage request = new();
-        request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
-        request.Method = HttpMethod.Get;
-      
-      // FIXME : Doesn't work locally
-        request.Headers.Add("api-key", "PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs");
-      
- 
-        //request.Headers.Add("Access-Control-Allow-Origin", "*");
-        
-        //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        var endpoint = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
-
-        try
-        {
-
-            // Assuming GetCategoriesAsync returns a List<string> or similar collection of category names.
-            
-            HttpResponseMessage response = await httpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                //jsonResponse = await response.Content.ReadAsStringAsync();
-
-                // Assuming the API returns a JSON array of strings.
-                //cList = JsonConvert.DeserializeObject<List<string>>(jsonResponse);
-                jsonResponse = await response.Content.ReadAsStringAsync();
-                var categories = JObject.Parse(jsonResponse)["@search.facets"]["category"]
-                    .Select(c => c["value"].ToString())
-                    .ToList();
-                cList = categories;
-            }
-            else
-            {
-                // Handle error or throw an exception
-                throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error fetching categories: {ex.Message}");
-            throw new Exception($"Error fetching categories: {ex.Message}");
-        }
-
     }
 
 }

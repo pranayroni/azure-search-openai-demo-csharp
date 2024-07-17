@@ -112,10 +112,13 @@
     private async void CallAddValue(string str)
     {
         var matches = await SearchFunc(str);
-        if (matches != null && matches.Count() > 0 &&
-            string.Equals(str, matches.First(), StringComparison.OrdinalIgnoreCase))
+        if (matches != null && matches.Count() > 0)
         {
-            AddValue(matches.First());
+            foreach(var match in matches)
+            {
+                if (match.Equals(str, StringComparison.OrdinalIgnoreCase))
+                    AddValue(match);
+            }
         }
         else if (!Values.Any(s => s.Equals(str, StringComparison.OrdinalIgnoreCase)))
         {
