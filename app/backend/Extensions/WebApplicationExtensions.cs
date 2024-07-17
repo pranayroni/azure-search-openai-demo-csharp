@@ -11,6 +11,7 @@ using Azure;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 namespace MinimalApi.Extensions;
@@ -50,9 +51,7 @@ internal static class WebApplicationExtensions
 
     private static IResult OnGetCategories(HttpContext context)
     {
-        var dataPath = "../../data/";
-        var subdirs = Directory.GetDirectories(dataPath);
-        var categories = subdirs.Select(Path.GetFileName).ToList();
+        var categories = new List<string> { "don't", "use", "this", "endpoint!" };
 
         return Results.Json(categories);
     }
