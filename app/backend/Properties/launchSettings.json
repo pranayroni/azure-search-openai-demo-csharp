@@ -4,7 +4,11 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_USERNAME": "Nisarga.Shashidhar@knipper.com",
+        "AZURE_VAULT_KEY_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_KEY_VAULT_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5167"
@@ -13,7 +17,11 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_USERNAME": "Nisarga.Shashidhar@knipper.com",
+        "AZURE_VAULT_KEY_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_KEY_VAULT_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7181"
@@ -22,6 +30,12 @@
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "VaultUri": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_USERNAME": "Nisarga.Shashidhar@knipper.com",
+        "AZURE_VAULT_KEY_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/",
+        "AZURE_KEY_VAULT_ENDPOINT": "https://kv-r6lomx22dqabk.vault.azure.net/"
+      },
       "publishAllPorts": true
     }
   },

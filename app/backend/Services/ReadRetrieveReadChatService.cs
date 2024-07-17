@@ -94,10 +94,8 @@ public class ReadRetrieveReadChatService
 
         question += " 2024";
 
-
-
         string[]? followUpQuestionList = null;
-        if (overrides?.RetrievalMode != RetrievalMode.Text && embedding is not null) // if Vector mode
+        if (overrides?.RetrievalMode != RetrievalMode.Text && embedding is not null)
         {
             embeddings = (await embedding.GenerateEmbeddingAsync(question, cancellationToken: cancellationToken)).ToArray();
         }
@@ -105,7 +103,7 @@ public class ReadRetrieveReadChatService
         // step 1
         // use llm to get query if retrieval mode is not vector
         string? query = null;
-        if (overrides?.RetrievalMode != RetrievalMode.Vector) // if Text mode
+        if (overrides?.RetrievalMode != RetrievalMode.Vector)
         {
             var getQueryChat = new ChatHistory(@"You are a helpful AI assistant, generate search query for followup question.
 Make your response simple and precise. Return the query only, do not return any other text. Your query should start with the keywords Knipper and the current year.
@@ -121,8 +119,6 @@ Knipper 2024 standard plan AND dental AND employee benefit.
 
             query = result.Content ?? throw new InvalidOperationException("Failed to get search query");
         }
-
-
 
         // step 2
         // use query to search related docs

@@ -8,12 +8,10 @@
                      Variant="Variant.Outlined" CoerceValue="true"
                      ToStringFunc="@GetNameFunc" AdornmentColor="Color.Default" />
 
-    <MudChipSet AllClosable=true OnClose="RemoveValue" style="margin-left: 8px;">
         @foreach (var val in selectedValues)
         {
-            <MudChip Size=Size.Small Text="@GetNameFunc(val)" Color="Color.Secondary"/>
+            <MudChip OnClose="RemoveValue" Size=Size.Small Text="@GetNameFunc(val)" Color="Color.Secondary" />
         }
-    </MudChipSet>
 </div>
 
 @code {

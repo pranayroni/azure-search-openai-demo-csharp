@@ -10,7 +10,7 @@ using Azure;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
-
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 namespace MinimalApi.Extensions;
@@ -44,14 +44,15 @@ internal static class WebApplicationExtensions
 
         api.MapPost("delete", OnPostDeleteAsync);
 
+
         return app;
     }
 
     private static IResult OnGetCategories(HttpContext context)
     {
-        // FIXME: this isn't even being used..?
+        // FIXME: This endpoint is not being used anywhere in the code. This should be fixed!! 
+        var categories = new List<string> { "don't", "use", "this", "endpoint!" };
 
-        var categories = new List<string> {"abbv", "knipper"}; // default cats
         return Results.Json(categories);
     }
 
@@ -89,7 +90,7 @@ internal static class WebApplicationExtensions
                     new ChatRequestUserMessage(prompt.Prompt)
                 }
             }, cancellationToken);
-
+        
         await foreach (var choice in response.WithCancellation(cancellationToken))
         {
             if (choice.ContentUpdate is { Length: > 0 })
@@ -97,7 +98,7 @@ internal static class WebApplicationExtensions
                 yield return new ChatChunkResponse(choice.ContentUpdate.Length, choice.ContentUpdate);
             }
         }
-        Console.WriteLine("Prompt: " + prompt.Prompt);
+        Console.WriteLine("Prompt: "+ prompt.Prompt);
         await Task.Delay(1);
 
     }
@@ -142,7 +143,6 @@ internal static class WebApplicationExtensions
 
         return TypedResults.Ok(response);
     }
-
 
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
         BlobContainerClient client,

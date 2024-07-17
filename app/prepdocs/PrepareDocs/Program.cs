@@ -258,6 +258,10 @@ static async Task<string> UploadBlobAsync(string fileName, string blobName, Blob
     var blobClient = container.GetBlobClient(blobName);
     var url = blobClient.Uri.AbsoluteUri;
 
+    if (await blobClient.ExistsAsync())
+    {
+        return url;
+    }
 
     var blobHttpHeaders = new BlobHttpHeaders
     {

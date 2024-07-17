@@ -7,7 +7,6 @@ using Azure.Search.Documents;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Builder.Extensions;
 using System.IO;
-using Azure;
 
 namespace MinimalApi.Services;
 
@@ -47,10 +46,10 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
                 searchIndexName: searchIndex,
                 searchIndexClient: new SearchIndexClient(
                     new Uri(searchServiceEndpoint),
-                    new AzureKeyCredential("PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs")),
+                    defaultCredential),
                 documentAnalysisClient: new DocumentAnalysisClient(
                     new Uri(formRecognizerServiceEndpoint),
-                    new DefaultAzureCredential(),
+                    defaultCredential,
                     new DocumentAnalysisClientOptions
                     {
                         Diagnostics =
