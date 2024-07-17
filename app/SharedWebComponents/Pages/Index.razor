@@ -1,66 +1,171 @@
-﻿@page "/"
+@page "/"
+<MudTimeline TimelineAlign="_timelineAlign">
+    <MudTimelineItem  Elevation="25">
+        <ItemOpposite>
+            <MudText  Typo="Typo.h6">June 20th, 2024</MudText>
+        </ItemOpposite>
+        <ItemContent>
+            <MudPaper Elevation="0" Class="mt-n1">
+                <MudText  Typo="Typo.h6" GutterBottom="true">v2.0.0</MudText>
+                <MudText Typo="Typo.body1">Migration of v1</MudText>
+     <MudExpansionPanel Text="VIEW RELEASE NOTES" Expanded="false">
+        <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem Expanded='true' T='string' Text="Fix: Queries are independent of v1">
+        <MudTreeViewItem Expanded='true' T='string' Text="Document Bot now queries from own resources instead of v1." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded='true' T='string' Text="Feature: Support over limited Knipper Documents">
+        <MudTreeViewItem Expanded='true' T='string' Text="Only few Knipper documents have been uploaded to knowledgebase. Accuracy will improve as more are uploaded over course of development." />
+    </MudTreeViewItem>
+</MudTreeView>
 
-<PageTitle>Home</PageTitle>
 
-<MudCard Elevation="24">
-    <MudCardHeader>
-        <CardHeaderAvatar>
-            <MudAvatar Color="Color.Info" Size="Size.Large">
-                <MudIcon Icon="@Icons.Custom.Brands.MicrosoftAzure" Size="Size.Large" />
-            </MudAvatar>
-        </CardHeaderAvatar>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h5">
-                <MudLink Href="https://www.nuget.org/packages/Azure.AI.OpenAI" Color="Color.Secondary" 
-                         Target="_blank" aria-label="The official Azure.AI.OpenAI .NET NuGet link.">
-                    Azure.AI.OpenAI 📦
-                </MudLink>
-            </MudText>
-            <MudText Typo="Typo.h6">Blazor 💜 OpenAI</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudCarousel Class="mud-width-full"
-                     BulletsColor="Color.Primary" Style="height: 58vh;"
-                     AutoCycle="true" TData="Image" Context="image"
-                     ItemsSource=@_images AutoCycleTime=@TimeSpan.FromSeconds(3)>
-            <ItemTemplate>
-                <div class="d-flex flex-grow-1">
-                    <MudImage Fluid="true" Src=@image.Src Elevation="5" ObjectPosition="ObjectPosition.Center"
-                              Alt=@($"{image.Alt} (generated with Bing Create).") Class="rounded-lg mx-auto my-auto" />
-                </div>
-            </ItemTemplate>
-        </MudCarousel>
-        <div class="full-width pt-6 text-align-center">
-            <MudText Typo="Typo.caption">
-                These photo were created using generative AI
-                <MudLink Href="https://www.bing.com/images/create/" Target="_blank" 
-                         Class="mud-typography-caption mud-secondary-text"
-                         aria-label="Microsoft Bing Create link.">
-                    Bing - Image Creator (powered by DALL-E)
-                </MudLink>
-            </MudText>
-        </div>
-    </MudCardContent>
-    <MudCardActions>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Target="_blank"
-                       aria-label="Azure SDK for .NET link."
-                       Href="https://github.com/Azure/azure-sdk-for-net"
-                       Title="GitHub link for the Azure .NET SDK." />
-        <MudIconButton Icon="@Icons.Material.Filled.GetApp" Size="Size.Large" Target="_blank"
-                       aria-label="Azure.AI.OpenAI .NET NuGet link."
-                       Href="https://www.nuget.org/packages/Azure.AI.OpenAI" 
-                       Title="NuGet link for Azure.AI.OpenAI." />
-        <MudIconButton Icon="@Icons.Custom.Brands.Microsoft" Size="Size.Large" Target="_blank"
-                       aria-label="Microsoft Learn link for Azure OpenAI."
-                       Href="https://learn.microsoft.com/azure/cognitive-services/openai"
-                       Title="Microsoft Learn link for Azure OpenAI." />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" Target="_blank"
-                       aria-label="MudBlazor (Blazor component library) link."
-                       Href="https://www.mudblazor.com/" Title="MudBlazor Component Library link." />
-        <MudIconButton Icon="@Icons.Material.Filled.Html" Size="Size.Large" Target="_blank"
-                       aria-label="Markdig (GitHub repository) link."
-                       Href="https://github.com/xoofx/markdig" Title="Markdig GitHub repo link." />
-    </MudCardActions>
-</MudCard>
+    
+    </MudExpansionPanel>
+        
+      
+            </MudPaper>
+        </ItemContent>
+    </MudTimelineItem>
+    <MudTimelineItem  Elevation="25" TimelineAlign="TimelineAlign.End">
+        <ItemOpposite>
+            <MudText  Typo="Typo.h6">June 25th, 2024</MudText>
+        <MudAlert Severity="Severity.Warning">Authentication is temporarily disabled.</MudAlert>
+        </ItemOpposite>
+        <ItemContent>
+            <MudPaper Elevation="0" Class="mt-n1">
+                <MudText  Typo="Typo.h6" GutterBottom="true">v2.0.1</MudText>
+                <MudText Typo="Typo.body2">Azure AD Authentication SSO Support</MudText>
+                 <MudExpansionPanel Text="VIEW RELEASE NOTES" Expanded="false">
+            <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem Expanded='true' T='string' Text="Feature: Authentication Support">
+        <MudTreeViewItem Expanded='true' T='string' Text="Microsoft SSO will authenticate the user with Knipper's Azure AD. User must be a member of the Knipper Azure Tenant to be authorized this service." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded='true' T='string' Text="Feature: Single filter support for query">
+        <MudTreeViewItem Expanded='true' T='string' Text="Queries can now be filtered by a single tag using the 'Exclude Category' dropdown available in the chat view." />
+    </MudTreeViewItem>
+</MudTreeView>
+
+        
+                 
+    </MudExpansionPanel>
+            </MudPaper>
+        </ItemContent>
+    </MudTimelineItem>
+    <MudTimelineItem  Elevation="25">
+        <ItemOpposite>
+            <MudText  Typo="Typo.h6" GutterBottom="true">July 1st, 2024</MudText>
+        </ItemOpposite>
+        <ItemContent>
+            <MudPaper Elevation="0" Class="mt-n1">
+                <MudText  Typo="Typo.h6" GutterBottom="true">v2.0.2</MudText>
+                <MudText Typo="Typo.body2">AI Search Accuracy Improvements and Multi-Filter support</MudText>
+                                 <MudExpansionPanel Text="VIEW RELEASE NOTES" Expanded="false">
+           <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem Expanded='true' T='string' Text="Enhancement: Improvements to search accuracy">
+        <MudTreeViewItem Expanded='true' T='string' Text="Document Bot was not aware of all documents in knowledgebase pertaining to knipper." />
+        <MudTreeViewItem Expanded='true' T='string' Text="Adding this context has improved accuracy significantly." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded='true' T='string' Text="Enhancement: Multi filter support for query">
+        <MudTreeViewItem Expanded='true' T='string' Text="Queries can now be filtered by a single tag using the 'Exclude Category' dropdown available in the chat view." />
+    </MudTreeViewItem>
+</MudTreeView>
+          
+                 
+    </MudExpansionPanel>
+            </MudPaper>
+        </ItemContent>
+    </MudTimelineItem>
+    <MudTimelineItem Color="Color.Info" Elevation="25">
+        <ItemOpposite>
+            <MudText Color="Color.Info" Typo="Typo.h6" GutterBottom="true">July 12th, 2024</MudText>
+        <MudAlert Severity="Severity.Success" Class='my-2'>Currently Active Version</MudAlert>
+
+        </ItemOpposite>
+        <ItemContent>
+            <MudPaper Elevation="0" Class="mt-n1">
+                <MudText Color="Color.Info" Typo="Typo.h6" GutterBottom="true">v2.0.3</MudText>
+                <MudText Typo="Typo.body2">Major Database Refactor, Documents Upload/Update/Delete support, AI Search Improvements</MudText>
+                                 <MudExpansionPanel Text="VIEW RELEASE NOTES" Expanded="false">
+            <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem Expanded T='string' Text="Enhancement: Migrating to new refactored vector database">
+        <MudTreeViewItem T='string' Class='my-4' Text="Updated vector database to allow embeddings to be associated with a file that can have multiple tags." />
+        <MudTreeViewItem T='string' Class='my-4' Text="New blob database and vector databases are populated with existing files from document bot knowledge base." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded T='string' Text="Feature: Delete documents in knowledgebase">
+        <MudTreeViewItem T='string' Class = 'my-4' Text="Users can request to delete documents when viewing them. (Delete will remove the embeddings as well as the ENTIRE pdf from database)" />
+        <MudTreeViewItem T='string' Class = 'my-4' Text="Ex. Requesting to delete 'foo-23.pdf' will remove ALL files prefixed 'foo' and their embeddings." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded T='string' Text="Feature: Update Documents support">
+        <MudTreeViewItem T='string' Class = 'my-4'Text="Uploading a file with existing filename will update it in the database and recompute embeddings." />
+    </MudTreeViewItem>
+    <MudTreeViewItem Expanded T='string' Text="Feature: Internet Search Defaulting">
+        <MudTreeViewItem T='string' Class = 'my-4' Text="Document Bot will try to find answers on the internet, if the query is outside the scope of the knowledgebase." />
+    </MudTreeViewItem>
+      <MudTreeViewItem Expanded T='string' Text="Fix: Voice Chat Removed">
+        <MudTreeViewItem T='string'  Class="my-4" Text="Voice services are no longer supported." />
+    </MudTreeViewItem>
+      <MudTreeViewItem Expanded T='string' Text="Enhancement: Model updated to 4o">
+        <MudTreeViewItem T='string'  Class="my-4" Text="Updated model from gpt-3.5turbo to gpt-4o." />
+    </MudTreeViewItem>
+</MudTreeView>
+
+    </MudExpansionPanel>
+            </MudPaper>
+        </ItemContent>
+    </MudTimelineItem>
+    <MudTimelineItem Color="Color.Warning" Elevation="25">
+        <ItemOpposite>
+            <MudText Color="Color.Warning" Typo="Typo.h6" GutterBottom="true">Development In Progress..</MudText>
+        <!-- <MudAlert Severity="Severity.Error" Class='my-2'>Currently querying from a new limited Knowledge Base. Responses may be inaccurate.</MudAlert> -->
+        <MudAlert Severity="Severity.Normal" Variant="Variant.Filled" Class='my-2'>Release Scheduled: 7/19/24</MudAlert>
+
+        </ItemOpposite>
+        <ItemContent>
+            <MudPaper Elevation="0" Class="mt-n1">
+                <MudText Color="Color.Warning" Typo="Typo.h6" GutterBottom="true">v2.0.4</MudText>
+                <MudText Typo="Typo.body2">Multi-Chat + Performance / Bug fixes</MudText>
+                                 <MudExpansionPanel Text="VIEW RELEASE PLAN" Expanded="false">
+            <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem T='string' Text="Fix: Slow Upload Speed">
+        <MudAlert Severity="Severity.Normal" Dense="true" Class="my-2" Variant='Variant.Outlined'>Development in progress</MudAlert>
+        <MudTreeViewItem  T='string' Class="my-4" Text="Improved file upload speed" />
+    </MudTreeViewItem>
+     <MudTreeViewItem T='string' Text="Feature: Multi-Chat">
+        <MudAlert Severity="Severity.Normal" Dense="true" Class="my-2" Variant='Variant.Outlined'>Development in progress</MudAlert>
+        <MudTreeViewItem T='string'  Class="my-4" Text="Users can save chat histories and choose which chat to resume" />
+    </MudTreeViewItem>
+     <MudTreeViewItem T='string' Text="Enhancement: AI Finetuning and Prompt Engineering">
+        <MudAlert Severity="Severity.Normal" Dense="true" Class="my-2" Variant='Variant.Outlined'>Development in progress</MudAlert>
+        <MudTreeViewItem T='string'  Class="my-4" Text="New 4o model will produce more accurate results when querying documents and internet." />
+    </MudTreeViewItem>
+</MudTreeView>
+
+<!--
+        <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
+        <MudText GutterBottom="true">Known Issues</MudText>
+          <MudTreeView T="string" ReadOnly>
+    <MudTreeViewItem T='string' Text="Issue">
+        <MudTreeViewItem  T='string' Class="my-4" Text="Still looking.." />
+    </MudTreeViewItem> 
+         </MudTreeView> -->
+                 
+    </MudExpansionPanel>
+            </MudPaper>
+        </ItemContent>
+    </MudTimelineItem>
+</MudTimeline>
+
+
+@code {
+    bool _expanded = false;
+
+    private void OnExpandCollapseClick() {
+        _expanded = !_expanded;
+    }
+  
+}
+
+@code{
+    private TimelineAlign _timelineAlign { get; set; } = TimelineAlign.Start;
+  
+}

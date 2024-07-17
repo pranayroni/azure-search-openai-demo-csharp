@@ -11,7 +11,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
+# Spyder project settings	
 .spyderproject
 .spyproject
 
@@ -483,3 +483,14 @@ env/
 venv/
 myvenv/
 ENV/
+/app/backend/Extensions/KeyVaultConfigurationBuilderExtensions.cs
+/app/backend/Models/ChatPromptResponse.cs
+/app/backend/Models
+/app/backend/.config
+/app/backend/Properties/ServiceDependencies/local
+/app/backend/Properties/launchSettings.json
+*.json
+/app/frontend/Properties/launchSettings.json
+/app/backend/Extensions/KeyVaultConfigurationBuilderExtensions.cs
+/app/backend/Properties/launchSettings.json
+.azure/rg-knipper-ai-docbot-csharp/.env

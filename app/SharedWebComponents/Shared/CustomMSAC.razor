@@ -16,12 +16,10 @@
     </MudItem>
     <MudItem id="chipset" xs="12" Class="overflow-x-auto">
 
-        <MudChipSet AllClosable=true OnClose="RemoveValue" style="margin-left: 8px;">
             @foreach (var val in selectedValues)
             {
-                <MudChip Size=Size.Small Text="@(val)" Color="Color.Secondary" />
+                <MudChip Size=Size.Small Text="@(val)"  OnClose="RemoveValue" Color="Color.Secondary" />
             }
-        </MudChipSet>
     </MudItem>
 </MudGrid>
 

@@ -7,7 +7,7 @@ on:
         default: Manual run
   push:
     branches:
-      - main
+      - prod
 
 # https://learn.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#set-up-azure-login-with-openid-connect-authentication
 permissions:
@@ -78,14 +78,10 @@ jobs:
         shell: pwsh
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set up Resource Group
+      - name: Enable Resource Group Deployments
         run: azd config set alpha.resourceGroupDeployments on
-        env:
-          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-
       - name: Provision Infrastructure
-        run: azd provision --no-prompt --debug
+        run: azd provision --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
@@ -93,7 +89,7 @@ jobs:
           AZURE_TAGS: ${{ secrets.AZURE_TAGS }}
 
       - name: Deploy Application
-        run: azd deploy --no-prompt --debug
+        run: azd deploy --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}

@@ -1,9 +1,16 @@
-﻿<MudText Typo="Typo.h5" Color="Color.Secondary" Class="pb-2">
-    @BusyMessage
-</MudText>
-<MudProgressCircular Color="Color.Secondary" Indeterminate="true" Class="pb-4" />
-
-@code {
-    [Parameter]
-    public string BusyMessage { get; set; } = "🤖 I'm generating an answer... Please wait.";
-}
+﻿    <MudCardContent >
+        <MudSkeleton Animation="Animation.Wave" Width="80%" />
+        <MudSkeleton Animation="Animation.Wave" Width="90%" />
+        <MudSkeleton Animation="Animation.Wave" Width="75%" />
+        <MudSkeleton Animation="Animation.Wave" Width="100%" />
+         <MudCardActions>
+        <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+        <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+        <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+    </MudCardActions>
+         <MudCardActions>
+        <MudSkeleton Width="120px" Height="40px" Class="ml-2" />
+        <MudSkeleton Width="125px" Height="40px" Class="ml-3" />
+    </MudCardActions>
+     
+    </MudCardContent>

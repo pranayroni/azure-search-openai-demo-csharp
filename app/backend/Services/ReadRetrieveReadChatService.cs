@@ -89,8 +89,10 @@ public class ReadRetrieveReadChatService
         var embedding = _kernel.GetRequiredService<ITextEmbeddingGenerationService>();
         float[]? embeddings = null;
         var question = history.LastOrDefault(m => m.IsUser)?.Content is { } userQuestion
-            ? userQuestion
+            ? userQuestion.Replace("knipper", string.Empty)
             : throw new InvalidOperationException("Use question is null");
+
+        question += " 2024";
 
         string[]? followUpQuestionList = null;
         if (overrides?.RetrievalMode != RetrievalMode.Text && embedding is not null)
@@ -104,10 +106,10 @@ public class ReadRetrieveReadChatService
         if (overrides?.RetrievalMode != RetrievalMode.Vector)
         {
             var getQueryChat = new ChatHistory(@"You are a helpful AI assistant, generate search query for followup question.
-Make your respond simple and precise. Return the query only, do not return any other text.
+Make your response simple and precise. Return the query only, do not return any other text. Your query should start with the keywords Knipper and the current year.
 e.g.
-Knipper Health Plus AND standard plan.
-standard plan AND dental AND employee benefit.
+Knipper 2024 Health Plus AND standard plan.
+Knipper 2024 standard plan AND dental AND employee benefit.
 ");
 
             getQueryChat.AddUserMessage(question);
