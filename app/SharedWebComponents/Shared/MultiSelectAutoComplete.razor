@@ -1,23 +1,56 @@
-@inject HttpClient Http
+﻿@inject HttpClient Http
 @typeparam T
 
-<div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
-    <MudAutocomplete T="@T" @bind-Value="theValue" SearchFunc="SearchFunc"
-                     ShowProgressIndicator="true" DebounceInterval="600"
-                     Label="@Label" Clearable="true" Immediate="false"
-                     Variant="Variant.Outlined" CoerceValue="true"
-                     ToStringFunc="@GetNameFunc" AdornmentColor="Color.Default" />
-
-        @foreach (var val in selectedValues)
-        {
-            <MudChip OnClose="RemoveValue" Size=Size.Small Text="@GetNameFunc(val)" Color="Color.Secondary" />
-        }
-</div>
+<MudGrid Justify="Justify.Center" class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
+    <MudItem xs="6">
+        <MudAutocomplete T="@T" @bind-Value="theValue" SearchFunc="SearchFunc"
+            ShowProgressIndicator="true" DebounceInterval="600"
+            Label="@Label" Clearable="true" Immediate="false"
+            Variant="Variant.Outlined" CoerceValue="true"
+            ToStringFunc="@GetNameFunc" AdornmentColor="MudBlazor.Color.Default" />
+    </MudItem>
+    
+    <MudItem xs="6" class="mt-2">
+        <MudGrid Justify="Justify.FlexStart" >
+            @if(calculateRows() > 2)
+            {
+                for(int i = 0; i < maxVisibleItems; i++)
+                {
+                    <MudChip OnClose="RemoveValue" Size=MudBlazor.Size.Small Text="@GetNameFunc(selectedValues.ElementAt(i))" Color="MudBlazor.Color.Secondary" class="mb-1" />
+                }
+                <MudChip OnClick="ShowCategoryManager" Size=MudBlazor.Size.Small Text="..." Color="MudBlazor.Color.Secondary" class="mb-1" />
+            }
+            else
+            {
+                CloseCategoryManager();
+                foreach (var val in selectedValues)
+                {
+                    <MudChip OnClose="RemoveValue" Size=MudBlazor.Size.Small Text="@GetNameFunc(val)" Color="MudBlazor.Color.Secondary" class="mb-1" />
+                }
+            }
+            <MudPopover Open="@showCategoryManager" Fixed="true" Class="px-4 pt-4" OverflowBehavior="OverflowBehavior.FlipAlways"
+                AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                <MudGrid Justify="Justify.FlexStart">
+                    @foreach (var val in selectedValues)
+                    {
+                        <MudChip OnClose="RemoveValue" Size=MudBlazor.Size.Small Text="@GetNameFunc(val)" Color="MudBlazor.Color.Secondary" class="mb-1" />
+                    }
+                </MudGrid>
+                <MudButton OnClick="CloseCategoryManager" Class="ml-auto mr-n3 mb-1 mt-3" Color="MudBlazor.Color.Error">Close</MudButton>
+            </MudPopover>
+        </MudGrid>
+    </MudItem>
+    
+</MudGrid>
 
 @code {
     #nullable enable
     [Parameter]
     public IEnumerable<T>? Values { get; set; }
+
+    public bool showCategoryManager = false;
+    int maxVisibleItems = 3;
+
 #nullable restore
     [Parameter]
     public EventCallback<IEnumerable<T>> ValuesChanged { get; set; }
@@ -33,9 +66,6 @@
 
     private HashSet<T> selectedValues = new HashSet<T>();
 
-    //[CascadingParameter(Name = nameof(Settings))]
-    //public required RequestSettingsOverrides Settings { get; set; }
-
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
@@ -43,12 +73,10 @@
         if (Values == null)
         {
             selectedValues.Clear();
-            //Settings.Overrides.ExcludeCategory = new List<string>();
         }
         else if (!Values.SequenceEqual(selectedValues))
         {
             selectedValues = Values.ToHashSet();
-            //Settings.Overrides.ExcludeCategory = selectedValues.Select(GetNameFunc).ToList();
             ValuesChanged.InvokeAsync(Values);
         }
     }
@@ -56,7 +84,6 @@
     private void RefreshBinding()
     {
         Values = selectedValues.ToList();
-        //Settings.Overrides.ExcludeCategory = selectedValues.Select(GetNameFunc).ToList();
         ValuesChanged.InvokeAsync(Values);
         StateHasChanged();
     }
@@ -76,6 +103,65 @@
         }
     }
 
+    private int calculateRows()
+    {
+
+        List<T> values = selectedValues.ToList();
+        float totalWidth = 0;
+        var widthsInRow = new List<float>();
+        int rows = 0;
+        maxVisibleItems = -1;
+        for(int i = 0; i < values.Count; i++)
+        {
+            var newWidth = EstimateStringWidthInEms(GetNameFunc(values[i])) + 4;
+            totalWidth = Sum(widthsInRow);
+            if(newWidth > 12)
+            {
+                rows += 2;
+                widthsInRow.Clear();
+            }
+            else if (totalWidth + newWidth > 15)
+            {
+                widthsInRow.Clear();
+                rows++;
+                widthsInRow.Add(newWidth);
+            }
+            else
+            {
+                widthsInRow.Add(newWidth);
+            }
+            if (rows >= 2 && maxVisibleItems == -1)
+            {
+                maxVisibleItems = i;
+            }
+
+        }
+        return rows;
+
+    }
+
+    private float EstimateStringWidthInEms(string text, float baseFontSizeInPixels = 12f)
+    {
+        // Estimate the average width of a character in pixels. This value will vary based on the font.
+        float averageCharWidthInPixels = baseFontSizeInPixels / 2;
+
+        // Calculate the total estimated width of the string in pixels.
+        float stringWidthInPixels = text.Length * averageCharWidthInPixels;
+
+        // Convert the width in pixels to ems, using the base font size.
+        float stringWidthInEms = stringWidthInPixels / baseFontSizeInPixels;
+
+        return stringWidthInEms;
+    }
+
+
+    private float Sum(List<float> source)
+    {
+        double sum = 0;
+        foreach (float v in source) sum += v;
+        return (float)sum;
+    }
+
     /// <summary>
     /// Note that this is required to a) clear the control after you add
     /// an item to the list, and b) to trigger the addvalue method.
@@ -86,5 +172,14 @@
     {
         get => default(T);
         set { AddValue(value); }
+    }
+
+    private void ShowCategoryManager()
+    {
+        showCategoryManager = !showCategoryManager;
+    }
+    private void CloseCategoryManager()
+    {
+        showCategoryManager = false;
     }
 }
