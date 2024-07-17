@@ -19,7 +19,6 @@ internal static class ServiceCollectionExtensions
             
             return blobServiceClient;
 
-            //return new BlobServiceClient(new Uri("https://st2aogn7isw2jry.blob.core.windows.net/"), s_azureCredential);
         });
 
         services.AddSingleton<BlobContainerClient>(sp =>
@@ -27,7 +26,6 @@ internal static class ServiceCollectionExtensions
             var config = sp.GetRequiredService<IConfiguration>();
             var azureStorageContainer = config["AzureStorageContainer"];
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
-            //return new BlobContainerClient(new Uri("https://minimalapi.blob.core.windows.net/minimalapi"), s_azureCredential);
         });
 
         services.AddSingleton<ISearchService, AzureSearchService>(sp =>
@@ -43,7 +41,6 @@ internal static class ServiceCollectionExtensions
                                new Uri(azureSearchServiceEndpoint), azureSearchIndex, s_azureCredential);
             
             return new AzureSearchService(searchClient);
-            //return new AzureSearchService(new SearchClient(new Uri("https://gptkb-2aogn7isw2jry.search.windows.net"), "minimalapi", s_azureCredential));
         });
 
         services.AddSingleton<DocumentAnalysisClient>(sp =>
@@ -55,13 +52,11 @@ internal static class ServiceCollectionExtensions
                 new Uri(azureOpenAiServiceEndpoint), s_azureCredential);
             return documentAnalysisClient;
 
-            //return new DocumentAnalysisClient(new Uri("https://minimalapi.search.windows.net"), s_azureCredential );
         });
 
         services.AddSingleton<OpenAIClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            //var useAOAI = config["UseAOAI"] == "true";
             var useAOAI = true;
 
             if (useAOAI)
@@ -82,14 +77,12 @@ internal static class ServiceCollectionExtensions
                 return openAIClient;
             }
 
-            //return new OpenAIClient("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");
         });
 
         services.AddSingleton<AzureBlobStorageService>();
         services.AddSingleton<ReadRetrieveReadChatService>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            //var useVision = config["UseVision"] == "true";
             var useVision = false;
             var openAIClient = sp.GetRequiredService<OpenAIClient>();
             var searchClient = sp.GetRequiredService<ISearchService>();
