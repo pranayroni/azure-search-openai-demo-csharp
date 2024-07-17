@@ -13,6 +13,7 @@ public sealed partial class Docs : IDisposable
     private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private Task _getCategoriesTask = null!;
+    private bool _isLoadingCategories = false;
     private bool _isLoadingDocuments = false;
     private bool _isUploadingDocuments = false;
     private string _filter = "";
@@ -23,8 +24,6 @@ public sealed partial class Docs : IDisposable
 
     public IEnumerable<string> category = new List<string>();
     public List<string>? cList = null;
-    public string jsonResponse = string.Empty;
-
 
     [Inject]
     public required ApiClient Client { get; set; }
@@ -47,7 +46,9 @@ public sealed partial class Docs : IDisposable
     {
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
+        category = new List<string>();
         _getDocumentsTask = GetDocumentsAsync();
+        _getCategoriesTask = GetCategoriesAsync();
     }
 
     private bool OnFilter(DocumentResponse document) => document is not null
@@ -71,6 +72,21 @@ public sealed partial class Docs : IDisposable
         finally
         {
             _isLoadingDocuments = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task GetCategoriesAsync()
+    {
+        _isLoadingCategories = true;
+
+        try
+        {
+            cList = await Client.GetCategoriesAsync(_cancellationTokenSource.Token);
+        }
+        finally
+        {
+            _isLoadingCategories = false;
             StateHasChanged();
         }
     }
@@ -158,54 +174,6 @@ public sealed partial class Docs : IDisposable
         await Client.RequestDeleteAsync(deleteRequest, cancellationToken);
         await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
         manager.NavigateTo(manager.Uri, true);
-
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        category = new List<string>();
-        var httpClient = new HttpClient();
-        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //httpClient.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-        HttpRequestMessage request = new();
-        request.RequestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
-        request.Method = HttpMethod.Get;
-        request.Headers.Add("api-key", "PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs");
-        //request.Headers.Add("Access-Control-Allow-Origin", "*");
-
-        //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        var endpoint = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
-
-        try
-        {
-
-            // Assuming GetCategoriesAsync returns a List<string> or similar collection of category names.
-
-            HttpResponseMessage response = await httpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                //jsonResponse = await response.Content.ReadAsStringAsync();
-                // Assuming the API returns a JSON array of strings.
-                //cList = JsonConvert.DeserializeObject<List<string>>(jsonResponse);
-                jsonResponse = await response.Content.ReadAsStringAsync();
-                var categories = JObject.Parse(jsonResponse)["@search.facets"]["category"]
-                    .Select(c => c["value"].ToString())
-                    .ToList();
-                cList = categories;
-            }
-            else
-            {
-                // Handle error or throw an exception
-                throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode} Message: {response.Content}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error fetching categories: {ex.Message}");
-            throw new Exception($"Error fetching categories: {ex.Message}");
-        }
 
     }
 

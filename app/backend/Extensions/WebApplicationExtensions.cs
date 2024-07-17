@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Builder.Extensions;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 
 namespace MinimalApi.Extensions;
@@ -40,7 +42,7 @@ internal static class WebApplicationExtensions
 
         api.MapGet("enableLogout", OnGetEnableLogout);
 
-        api.MapGet("categories", OnGetCategories);
+        api.MapGet("categories", OnGetCategoriesAsync);
 
         api.MapPost("delete", OnPostDeleteAsync);
 
@@ -48,13 +50,40 @@ internal static class WebApplicationExtensions
         return app;
     }
 
-    private static IResult OnGetCategories(HttpContext context)
+    private static async Task<IResult> OnGetCategoriesAsync()
     {
-        // FIXME: This endpoint is not being used anywhere in the code. This should be fixed!! 
-        var categories = new List<string> { "don't", "use", "this", "endpoint!" };
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        return Results.Json(categories);
+        var requestUri = new Uri("https://gptkb-r6lomx22dqabk.search.windows.net/indexes/gptkbindex/docs?api-version=2024-05-01-preview&facet=category,count:1000");
+        var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        request.Headers.Add("api-key", "PQy5AIQF6dO3Ng2Pi15mgFIHsv5A3cc4XQOOoDIqIwAzSeA6WCrs");
+
+        try
+        {
+            var response = await httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var categories = JObject.Parse(jsonResponse)["@search.facets"]["category"]
+                    .Select(c => c["value"].ToString())
+                    .ToList();
+
+                return Results.Json(categories);
+            }
+            else
+            {
+                // Log the error or handle it as needed
+                return Results.Problem($"Failed to fetch categories. Status code: {response.StatusCode}", statusCode: (int)response.StatusCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception details as needed
+            return Results.Problem($"Error fetching categories: {ex.Message}", statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
+
 
 
     private static IResult OnGetEnableLogout(HttpContext context)
