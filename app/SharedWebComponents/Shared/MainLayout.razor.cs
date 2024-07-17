@@ -56,13 +56,13 @@ public sealed partial class MainLayout
     private Task _getCategoriesTask = null!;
     private bool _isLoadingCategories = false;
 
-    private bool SettingsDisabled => new Uri(Nav.Uri).Segments.LastOrDefault() switch
+    private bool SettingsDisabled => new Uri(Nav.Uri).Segments.LastOrDefault().TrimEnd('/') switch
     {
         "ask" or "chat" => false,
         _ => true
     };
 
-    private bool SortDisabled => new Uri(Nav.Uri).Segments.LastOrDefault() switch
+    private bool SortDisabled => new Uri(Nav.Uri).Segments.LastOrDefault().TrimEnd('/') switch
     {
         "voicechat" or "chat" => false,
         _ => true
