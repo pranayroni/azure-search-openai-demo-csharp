@@ -7,7 +7,7 @@
 
 <MudGrid Justify="Justify.Center">
     <MudItem id="answers" xs="12" Class="overflow-x-auto">
-        @if (_questionAndAnswerMap is { Count: 0 })
+        @if (_currentChat.ChatHistory is { Count: 0 })
         {
             <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
                 <Examples Message="Chat with your data" OnExampleClicked="@OnAskQuestionAsync" />
@@ -16,7 +16,7 @@
         else
         {
             <MudStack Reverse="@IsReversed" Spacing="12">
-                @foreach (var ((question, askedOn), answer) in _questionAndAnswerMap)
+                @foreach (var ((question, askedOn), answer) in _currentChat.ChatHistory)
                 {
                     <MudStack Justify="Justify.Center" AlignItems="AlignItems.Start" Spacing="4">
                         <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary"
@@ -87,7 +87,7 @@
                             <MudFab Color="Color.Primary" Size="Size.Medium"
                                     StartIcon=@Icons.Material.Filled.DeleteForever
                                     aria-label="Clear chat."
-                                    OnClick="@OnClearChat" Disabled=@(_isReceivingResponse || _questionAndAnswerMap is { Count: 0 }) />
+                                    OnClick="@OnClearChat" Disabled=@(_isReceivingResponse || _currentChat.ChatHistory is { Count: 0 }) />
                         </MudTooltip>
                     </MudItem>
                 </MudGrid>

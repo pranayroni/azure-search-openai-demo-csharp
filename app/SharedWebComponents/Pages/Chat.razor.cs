@@ -29,15 +29,43 @@ public sealed partial class Chat
 
     private ChatInstance _currentChat;
 
-    protected override void OnInitialized()
+    private void UpdateChatHistory()
     {
         _currentChat = ChatService.GetChatInstanceById(ChatId);
-        _questionAndAnswerMap = _currentChat.ChatHistory;
+        if (_currentChat != null)
+        {
+            _questionAndAnswerMap = _currentChat.ChatHistory;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        UpdateChatHistory();
+        ChatService.ChatUpdated += HandleChatUpdated;
+    }
+    private void HandleChatUpdated(Guid chatId)
+    {
+        if (chatId == this.ChatId)
+        {
+            // the current chat was updated; refresh the component
+            InvokeAsync(() =>
+            {
+                UpdateChatHistory();
+                StateHasChanged();
+            });
+        }
+    }
+    public void Dispose() // thread safety !! 
+    {
+        ChatService.ChatUpdated -= HandleChatUpdated;
     }
     protected override async Task OnParametersSetAsync()
     {
         _currentChat = ChatService.GetChatInstanceById(ChatId);
-        _questionAndAnswerMap = _currentChat.ChatHistory;
+        if(_currentChat!=null)
+        {
+            _questionAndAnswerMap = _currentChat.ChatHistory;
+        }
         await base.OnParametersSetAsync();
     }
 
@@ -62,14 +90,16 @@ public sealed partial class Chat
             return;
         }
 
+        var requestChatId = this.ChatId; // Capture the current chat ID at the start of the request because this is an async op
+        var requestQuestion = new UserQuestion(_userQuestion, DateTime.Now); // Capture the current question at the start of the request because this is an async op
         _isReceivingResponse = true;
         _lastReferenceQuestion = _userQuestion;
         _currentQuestion = new(_userQuestion, DateTime.Now);
-        _questionAndAnswerMap[_currentQuestion] = null;
+        ChatService.GetChatInstanceById(requestChatId).ChatHistory[_currentQuestion] = null; // assign null to indicate that the response is being fetched
 
         try
         {
-            var history = _questionAndAnswerMap
+            var history = ChatService.GetChatInstanceById(requestChatId).ChatHistory
                 .Where(x => x.Value?.Choices is { Length: > 0})
                 .SelectMany(x => new ChatMessage[] { new ChatMessage("user", x.Key.Question), new ChatMessage("assistant", x.Value!.Choices[0].Message.Content) })
                 .ToList();
@@ -81,16 +111,15 @@ public sealed partial class Chat
             var request = new ChatRequest([.. history], Settings.Overrides);
             var result = await ApiClient.ChatConversationAsync(request);
 
-            _questionAndAnswerMap[_currentQuestion] = result.Response;
-            if (result.IsSuccessful)
-            {
-                _userQuestion = "";
-                _currentQuestion = default;
-            }
+            // _questionAndAnswerMap[_currentQuestion] = result.Response;
+            ChatService.UpdateChatHistory(requestChatId, requestQuestion, result.Response);
+          
         }
         finally
         {
             _isReceivingResponse = false;
+                _userQuestion = "";
+                _currentQuestion = default;
         }
     }
 
@@ -99,5 +128,6 @@ public sealed partial class Chat
         _userQuestion = _lastReferenceQuestion = "";
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
+        ChatService.GetChatInstanceById(this.ChatId).ChatHistory.Clear();
     }
 }
