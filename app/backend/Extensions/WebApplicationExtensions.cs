@@ -25,9 +25,6 @@ internal static class WebApplicationExtensions
         Console.WriteLine("Mapping API endpoints");
         var api = app.MapGroup("api");
 
-        // Blazor 📎 Clippy streaming endpoint
-        api.MapPost("openai/chat", OnPostChatPromptAsync);
-
         // Long-form chat w/ contextual history endpoint
         api.MapPost("chat", OnPostChatAsync);
 
