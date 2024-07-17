@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using MinimalApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Newtonsoft;
@@ -51,6 +50,7 @@ internal static class WebApplicationExtensions
 
     private static IResult OnGetCategories(HttpContext context)
     {
+        // FIXME: This endpoint is not being used anywhere in the code. This should be fixed!! 
         var categories = new List<string> { "don't", "use", "this", "endpoint!" };
 
         return Results.Json(categories);
