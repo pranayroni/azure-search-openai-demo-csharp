@@ -8,6 +8,7 @@
     <LangVersion>preview</LangVersion>
     <UserSecretsId>feba7d78-952f-423c-95ed-d6a4051dd15f</UserSecretsId>
     <WarningsAsErrors>false</WarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 
   </PropertyGroup>
   <ItemGroup>
