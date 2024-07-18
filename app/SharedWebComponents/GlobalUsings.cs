@@ -17,6 +17,8 @@ global using Microsoft.AspNetCore.Components.Forms;
 global using Microsoft.AspNetCore.Components.Routing;
 global using Microsoft.AspNetCore.Components.Web;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Authentication.WebAssembly.Msal;
+global using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.JSInterop;
 global using MudBlazor;
