@@ -13,6 +13,7 @@ using Azure.Search.Documents.Indexes.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MinimalApi.Extensions;
@@ -40,6 +41,8 @@ internal static class WebApplicationExtensions
         // Get DALL-E image result from prompt
         api.MapPost("images", OnPostImagePromptAsync);
 
+        api.MapGet("username", OnGetUsername).RequireAuthorization();
+
         api.MapGet("enableLogout", OnGetEnableLogout);
 
         api.MapGet("categories", OnGetCategoriesAsync);
@@ -50,6 +53,20 @@ internal static class WebApplicationExtensions
         return app;
     }
 
+    [AllowAnonymous]
+    private static IResult OnGetUsername(HttpContext httpContext)
+    {
+        if (httpContext.User.Identity.IsAuthenticated)
+        {
+            var preferredUsername = httpContext.User.FindFirst("preferred_username")?.Value ?? "Unknown";
+            var email = httpContext.User.FindFirst("email")?.Value ?? "Unknown";
+            return Results.Ok(new {PreferredUsername = preferredUsername, Email = email});
+        } else
+        {
+            Console.WriteLine("User was unauthenticated.");
+            return Results.Unauthorized();
+        }
+    }
     private static async Task<IResult> OnGetCategoriesAsync()
     {
         using var httpClient = new HttpClient();
@@ -326,15 +343,8 @@ internal static class WebApplicationExtensions
         IConfiguration config,
         CancellationToken cancellationToken)
     {
-        var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
-        {
-            Prompt = prompt.Prompt,
-        },
-        cancellationToken);
+        Console.WriteLine("Image Generation is disabled.");
 
-        var imageUrls = result.Value.Data.Select(i => i.Url).ToList();
-        var response = new ImageResponse(result.Value.Created, imageUrls);
-
-        return TypedResults.Ok(response);
+        return TypedResults.Ok();
     }
 }

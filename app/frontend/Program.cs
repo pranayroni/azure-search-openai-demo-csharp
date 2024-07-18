@@ -1,9 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using ClientApp.Services;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.Authentication.WebAssembly.Msal;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+builder.Services.AddMsalAuthentication(options =>
+{
+    builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
+    options.ProviderOptions.DefaultAccessTokenScopes.Add("https://graph.microsoft.com/User.Read");
+});
 
 builder.RootComponents.Add<SharedWebComponents.App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");

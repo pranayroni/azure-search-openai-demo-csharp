@@ -19,8 +19,10 @@
     <PackageReference Include="Azure.Search.Documents" />
     <PackageReference Include="Azure.Storage.Blobs" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" />
     <PackageReference Include="Microsoft.ML" />
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />

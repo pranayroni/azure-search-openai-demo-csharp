@@ -6,10 +6,13 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
+    <WarningsAsErrors>false</WarningsAsErrors>
+
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="bunit" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="xunit" />
