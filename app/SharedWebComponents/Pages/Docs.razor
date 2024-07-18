@@ -9,7 +9,21 @@
             <MudForm @ref="@_form">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h5">Upload Documents</MudText>
+                        @if (_isUploadingDocuments)
+                        {
+                            <MudText Typo="Typo.h5">
+                                Uploading Documents
+                            </MudText>
+                            <MudProgressLinear Striped="true" Color="Color.Primary"
+                                Size="Size.Medium" Class="mt-2" Value="100" />
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h5">
+                                Upload Documents
+                            </MudText>
+                        }
+
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudIconButton Icon="@Icons.Material.Filled.CloudUpload"
@@ -106,7 +120,15 @@
                         Loading Documents
                     </MudText>
                     <MudProgressCircular Indeterminate="true"
-                                         Size="Size.Small" Class="ml-2" />
+                    Size="Size.Small" Class="ml-2" />
+                }
+                else if (_isDeletingDocuments)
+                {
+                    <MudText Typo="Typo.h5">
+                        Deleting Documents
+                    </MudText>
+                    <MudProgressCircular Indeterminate="true"
+                        Size="Size.Small" Class="ml-2" Color="Color.Error"/>
                 }
                 else
                 {
