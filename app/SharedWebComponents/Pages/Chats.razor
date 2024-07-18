@@ -1,0 +1,18 @@
+﻿@page "/chats"
+@using System.Collections.Generic
+
+<button @onclick="AddNewChat">New Chat</button>
+
+@foreach (var chat in chatInstances)
+{
+    <MudNavLink href="@($"/chat/{chat.Id}")" Icon="@Icons.Material.Rounded.Chat">Chat {chat.Id}</MudNavLink>
+}
+
+@code {
+    private List<ChatInstance> chatInstances = new List<ChatInstance>();
+
+    private void AddNewChat()
+    {
+        chatInstances.Add(new ChatInstance());
+    }
+}
