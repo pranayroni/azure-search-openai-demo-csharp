@@ -27,7 +27,9 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
-
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Microsoft.Authentication.WebAssembly.Msal" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedWebComponents\SharedWebComponents.csproj" />
     <ProjectReference Include="..\shared\Shared\Shared.csproj" />
