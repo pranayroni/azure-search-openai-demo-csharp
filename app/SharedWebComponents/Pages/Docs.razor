@@ -208,6 +208,7 @@
                 </MudTd>
                 <MudTd DataLabel="Delete" Style="text-align:center">
                     <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Delete"
+                            Disabled=@(_isDeletingDocuments)
                             Size="Size.Small" OnClick="@(() => OnDeleteAsync(manager, context.Name))" />
                 </MudTd>
             </RowTemplate>

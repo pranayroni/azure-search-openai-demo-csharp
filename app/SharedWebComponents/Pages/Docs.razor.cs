@@ -162,7 +162,9 @@ public sealed partial class Docs : IDisposable
         var index = fileName.LastIndexOf("-");
         fileName = fileName.Substring(0, index) + ".pdf";
         Snackbar.Add(
-             $"Deleting {fileName}.",
+             $"Deleting {fileName}. " +
+             $"This may take a couple of minutes, please be patient. " +
+             $"You will not be able to delete other documents during this time.",
              Severity.Success,
              static options =>
              {
