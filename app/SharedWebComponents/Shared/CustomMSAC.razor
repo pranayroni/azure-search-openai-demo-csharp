@@ -120,7 +120,7 @@
                     AddValue(match);
             }
         }
-        else if (!Values.Any(s => s.Equals(str, StringComparison.OrdinalIgnoreCase)))
+        if (!Values.Any(s => s.Equals(str, StringComparison.OrdinalIgnoreCase)))
         {
             AddValue(str);
         }

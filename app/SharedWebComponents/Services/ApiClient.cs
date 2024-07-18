@@ -18,13 +18,21 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<ImageResponse>();
     }
 
-    public async Task RequestDeleteAsync(
+    public async Task RequestDeleteBlobsAsync(
         DeleteRequest request, CancellationToken cancellationToken)
     {
         var response = await httpClient.PostAsJsonAsync(
-            "api/delete", request, SerializerOptions.Default, cancellationToken);
+            "api/delete/blobs", request, SerializerOptions.Default, cancellationToken);
         response.EnsureSuccessStatusCode();
-    } 
+    }
+
+    public async Task RequestDeleteEmbeddingsAsync(
+        DeleteRequest request, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            "api/delete/embeddings", request, SerializerOptions.Default, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
 
     public async Task<bool> ShowLogoutButtonAsync()
     {

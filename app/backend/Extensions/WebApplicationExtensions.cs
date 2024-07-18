@@ -26,9 +26,6 @@ internal static class WebApplicationExtensions
         Console.WriteLine("Mapping API endpoints");
         var api = app.MapGroup("api");
 
-        // Blazor 📎 Clippy streaming endpoint
-        api.MapPost("openai/chat", OnPostChatPromptAsync);
-
         // Long-form chat w/ contextual history endpoint
         api.MapPost("chat", OnPostChatAsync);
 
@@ -47,7 +44,10 @@ internal static class WebApplicationExtensions
 
         api.MapGet("categories", OnGetCategoriesAsync);
 
-        api.MapPost("delete", OnPostDeleteAsync);
+        api.MapPost("delete/blobs", OnPostDeleteBlobsAsync);
+
+        api.MapPost("delete/embeddings", OnPostDeleteEmbeddingsAsync);
+
 
 
         return app;
@@ -111,7 +111,8 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(enableLogout);
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(
+    //for voicechat
+    /*private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(
         PromptRequest prompt,
         OpenAIClient client,
         IConfiguration config,
@@ -146,8 +147,8 @@ internal static class WebApplicationExtensions
         }
         Console.WriteLine("Prompt: "+ prompt.Prompt);
         await Task.Delay(1);
-
-    }
+    
+    }*/
 
     private static async Task<IResult> OnPostChatAsync(
         ChatRequest request,
@@ -230,15 +231,27 @@ internal static class WebApplicationExtensions
         }
     }
 
-    private static async Task<IResult> OnPostDeleteAsync(
+    private static async Task<IResult> OnPostDeleteBlobsAsync(
         DeleteRequest deleteRequest,
         CancellationToken cancellationToken
     )
     {
         var file = deleteRequest.file;
 
-        Console.WriteLine($"Trying to delete {file}");
+        Console.WriteLine($"Trying to delete blobs for {file}");
         await RemoveBlobsAsync(file);
+
+        return TypedResults.Ok();
+    }
+
+    private static async Task<IResult> OnPostDeleteEmbeddingsAsync(
+        DeleteRequest deleteRequest,
+        CancellationToken cancellationToken
+    )
+    {
+        var file = deleteRequest.file;
+
+        Console.WriteLine($"Trying to delete embeddings for {file}");
         await RemoveFromIndexAsync(file);
 
         return TypedResults.Ok();
