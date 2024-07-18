@@ -16,6 +16,8 @@ public sealed partial class Docs : IDisposable
     private bool _isLoadingCategories = false;
     private bool _isLoadingDocuments = false;
     private bool _isUploadingDocuments = false;
+    private bool _isDeletingDocuments = false;
+
     private string _filter = "";
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
@@ -155,11 +157,14 @@ public sealed partial class Docs : IDisposable
 
     private async ValueTask OnDeleteAsync(NavigationManager manager, string fileName)
     {
+        _isDeletingDocuments = true;
         await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
         var index = fileName.LastIndexOf("-");
         fileName = fileName.Substring(0, index) + ".pdf";
         Snackbar.Add(
-             $"Deleting {fileName}.",
+             $"Deleting {fileName}. " +
+             $"This may take a couple of minutes, please be patient. " +
+             $"You will not be able to delete other documents during this time.",
              Severity.Success,
              static options =>
              {
@@ -173,6 +178,7 @@ public sealed partial class Docs : IDisposable
         var cancellationToken = _cancellationTokenSource.Token;
         await Client.RequestDeleteAsync(deleteRequest, cancellationToken);
         await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
+        _isDeletingDocuments = false;
         manager.NavigateTo(manager.Uri, true);
 
     }
