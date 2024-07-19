@@ -61,12 +61,34 @@
             <MudDivider Style="flex-grow: 0;" />
             <NavMenu />
         </MudDrawer>
+        @if (_isDeletingDocuments)
+        {
+            <MudPaper Class="fab-component" Elevation="3" Square="false">
+                <MudText Typo="Typo.h4" Class="fab-text">Deleting</MudText>
+                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Primary" Size="Size.Medium" Value="100" />
+            </MudPaper>
+
+        }
+        @if (_isUploadingDocuments)
+        {
+            <MudPaper Class="fab-component" Elevation="3" Square="false">
+                <MudText Typo="Typo.h4" Class="fab-text">Uploading</MudText>
+                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Primary" Size="Size.Medium" Value="100" />
+            </MudPaper>
+        }
+        
         <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.Large" Fixed="false" Class="my-6 pt-6">
                 <CascadingValue Value="_settingsPanel?.Settings" Name="Settings">
                     <CascadingValue Value="Settings2" Name="Settings2">
                         <CascadingValue Value="_isReversed" Name="IsReversed">
-                            @Body
+                            <CascadingValue Value="_isDeletingDocuments">
+                                <CascadingValue Value="_isUploadingDocuments">
+                                    <CascadingValue Value="UploadDocumentsEvent">
+                                        @Body
+                                    </CascadingValue>
+                                </CascadingValue>
+                            </CascadingValue>
                         </CascadingValue>
                     </CascadingValue>
                 </CascadingValue>
@@ -74,4 +96,5 @@
             <SettingsPanel @ref="_settingsPanel" @bind-Open="@_settingsOpen" />
         </MudMainContent>
     </MudLayout>
+
 </MudRTLProvider>
