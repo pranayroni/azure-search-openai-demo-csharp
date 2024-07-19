@@ -99,22 +99,9 @@ public sealed partial class Docs : IDisposable
 
     private async Task SubmitFilesForUploadAsync()
     {
-        //_isUploadingDocuments = true;
-        // Add the beforeunload event listener at the start of the upload process
-        //await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
 
         if (_fileUpload is { Files.Count: > 0 })
         {
-            
-            Snackbar.Add(
-                $"Uploading documents. " +
-                $"This may take a couple of minutes, please be patient. " +
-                $"You will not be able to upload additional documents during this time.",
-                Severity.Success,
-                static options =>
-                {
-                    options.ShowCloseIcon = true;
-                });
 
             UploadDocumentsArgs args = new()
             {
@@ -129,29 +116,7 @@ public sealed partial class Docs : IDisposable
             {
                 //await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
                 manager.NavigateTo(manager.Uri, true);
-                Snackbar.Add(
-                    $"Uploaded {args.UploadedFilesCount} documents.",
-                    Severity.Success,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
-                //_isUploadingDocuments = false;
                 await _fileUpload.ResetAsync();
-            }
-            else
-            {
-                Snackbar.Add(
-                    args.ErrorMessage,
-                    Severity.Error,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
-                //await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
-                //_isUploadingDocuments = false;
             }
         }
         

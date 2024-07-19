@@ -52,6 +52,7 @@ public sealed partial class MainLayout
     [Inject] public required ILocalStorageService LocalStorage { get; set; }
     [Inject] public required IDialogService Dialog { get; set; }
     [Inject] public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
 
     public RequestSettingsOverrides Settings2 { get; set; } = new();
 
@@ -95,6 +96,16 @@ public sealed partial class MainLayout
     private async void UploadDocumentsAsync (UploadDocumentsArgs args)
     {
         _isUploadingDocuments = true;
+        StateHasChanged();
+        Snackbar.Add(
+               $"Uploading documents. " +
+               $"This may take a couple of minutes, please be patient. " +
+               $"You will not be able to upload additional documents during this time.",
+               Severity.Success,
+               static options =>
+               {
+                   options.ShowCloseIcon = true;
+               });
         var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
 
         var cancellationToken = _cancellationTokenSource.Token;
@@ -105,12 +116,27 @@ public sealed partial class MainLayout
         if (result.IsSuccessful)
         {
             args.Success = true;
-            args.UploadedFilesCount = result.UploadedFiles.Length;
+            Snackbar.Add(
+                    $"Uploaded {result.UploadedFiles.Length} documents.",
+                    Severity.Success,
+                    static options =>
+                    {
+                        options.ShowCloseIcon = true;
+                        options.VisibleStateDuration = 10_000;
+                    });
         }
         else
         {
             args.Success = false;
-            args.ErrorMessage = result.Error;
+            Snackbar.Add(
+                    result.Error,
+                    Severity.Error,
+                    static options =>
+                    {
+                        options.ShowCloseIcon = true;
+                        options.VisibleStateDuration = 10_000;
+                    });
+
         }
         _isUploadingDocuments = false;
         StateHasChanged();
