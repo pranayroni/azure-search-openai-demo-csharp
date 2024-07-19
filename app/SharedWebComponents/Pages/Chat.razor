@@ -1,6 +1,8 @@
 ﻿@page "/{ChatId:guid}/chat"
 @inject ChatService ChatService
 
+@attribute [Authorize]
+
 <!-- This page is intended for conversational Q&A. -->
 
 <PageTitle>Chat</PageTitle>

@@ -13,6 +13,7 @@ using Azure.Search.Documents.Indexes.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MinimalApi.Extensions;
@@ -34,6 +35,11 @@ internal static class WebApplicationExtensions
         // Get all documents
         api.MapGet("documents", OnGetDocumentsAsync);
 
+        // Get DALL-E image result from prompt
+        api.MapPost("images", OnPostImagePromptAsync);
+
+        api.MapGet("username", OnGetUsername).RequireAuthorization();
+
         api.MapGet("enableLogout", OnGetEnableLogout);
 
         api.MapGet("categories", OnGetCategoriesAsync);
@@ -47,6 +53,20 @@ internal static class WebApplicationExtensions
         return app;
     }
 
+    [AllowAnonymous]
+    private static IResult OnGetUsername(HttpContext httpContext)
+    {
+        if (httpContext.User.Identity.IsAuthenticated)
+        {
+            var preferredUsername = httpContext.User.FindFirst("preferred_username")?.Value ?? "Unknown";
+            var email = httpContext.User.FindFirst("email")?.Value ?? "Unknown";
+            return Results.Ok(new {PreferredUsername = preferredUsername, Email = email});
+        } else
+        {
+            Console.WriteLine("User was unauthenticated.");
+            return Results.Unauthorized();
+        }
+    }
     private static async Task<IResult> OnGetCategoriesAsync()
     {
         using var httpClient = new HttpClient();
@@ -325,5 +345,19 @@ internal static class WebApplicationExtensions
             // It can take a few seconds for search results to reflect changes, so wait a bit
             await Task.Delay(TimeSpan.FromMilliseconds(2_000));
         }
+    }
+
+
+
+
+    private static async Task<IResult> OnPostImagePromptAsync(
+        PromptRequest prompt,
+        OpenAIClient client,
+        IConfiguration config,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine("Image Generation is disabled.");
+
+        return TypedResults.Ok();
     }
 }
