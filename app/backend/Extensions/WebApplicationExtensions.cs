@@ -34,9 +34,6 @@ internal static class WebApplicationExtensions
         // Get all documents
         api.MapGet("documents", OnGetDocumentsAsync);
 
-        // Get DALL-E image result from prompt
-        api.MapPost("images", OnPostImagePromptAsync);
-
         api.MapGet("enableLogout", OnGetEnableLogout);
 
         api.MapGet("categories", OnGetCategoriesAsync);
@@ -328,26 +325,5 @@ internal static class WebApplicationExtensions
             // It can take a few seconds for search results to reflect changes, so wait a bit
             await Task.Delay(TimeSpan.FromMilliseconds(2_000));
         }
-    }
-
-
-
-
-    private static async Task<IResult> OnPostImagePromptAsync(
-        PromptRequest prompt,
-        OpenAIClient client,
-        IConfiguration config,
-        CancellationToken cancellationToken)
-    {
-        var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
-        {
-            Prompt = prompt.Prompt,
-        },
-        cancellationToken);
-
-        var imageUrls = result.Value.Data.Select(i => i.Url).ToList();
-        var response = new ImageResponse(result.Value.Created, imageUrls);
-
-        return TypedResults.Ok(response);
     }
 }
