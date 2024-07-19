@@ -1,5 +1,7 @@
 ﻿@inherits             LayoutComponentBase
 @inject NavigationManager NavManager
+@inject IAccessTokenProvider AccessTokenProvider
+@inject SignOutSessionStateManager SignOutManager
 <MudThemeProvider @bind-IsDarkMode="@_isDarkTheme" Theme="_theme" />
 <MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Small"
                    CloseButton="true"
@@ -41,6 +43,7 @@
                 
             }
             <MudSpacer />
+           
             @if (SettingsDisabled is false)
                     {
             <MudIconButton Icon="@Icons.Material.Filled.Settings" style="@($"{(_isDarkTheme ? Colors.Brown.Default : Colors.Cyan.Default)}")" Size="Size.Large"
@@ -51,7 +54,22 @@
                                 ToggledSize="Size.Large"
                                  Title="Switch to Dark theme" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit"
                                 ToggledTitle="Switch to Light theme" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Warning />
-            <LogoutDisplay />
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenu Color="@Color.Inherit" Label="@context.User.Identity.Name">
+                        <MudMenuItem IconSize="Size.Small" OnClick="@OnUserInfoClicked" IconColor="Color.Primary" Icon="@Icons.Material.Rounded.Person">View Info</MudMenuItem>
+                        <MudMenuItem IconSize="Size.Small" OnClick="@OnLogOutClicked" IconColor="Color.Primary" Icon="@Icons.Material.Rounded.SensorDoor">Log Out</MudMenuItem>
+                    </MudMenu>
+                </Authorized>
+                <NotAuthorized>
+                    <MudButton Href="authentication/login"
+                               Variant="Variant.Text"
+                               EndIcon="@Icons.Custom.Brands.Microsoft"
+                               Color="Color.Inherit">
+                        Log In
+                    </MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
         </MudAppBar>
         <MudDrawer @bind-Open="_drawerOpen" Elevation="5" id="drawer">
             <MudDrawerHeader>
@@ -75,3 +93,19 @@
         </MudMainContent>
     </MudLayout>
 </MudRTLProvider>
+
+@code {
+    private void OnUserInfoClicked()
+    {
+        NavManager.NavigateTo("user");
+    }
+    private async void OnLogOutClicked()
+    {
+        await SignOutManager.SetSignOutState();
+        NavManager.NavigateTo("authentication/logout");
+    }
+    private void OnLogInClicked()
+    {
+        NavManager.NavigateTo("authentication/login");
+    }
+}
