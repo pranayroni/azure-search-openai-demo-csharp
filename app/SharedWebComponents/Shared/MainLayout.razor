@@ -16,10 +16,18 @@
 <MudRTLProvider RightToLeft="_isRightToLeft">
     <MudLayout class="@(_isRightToLeft ? "rtl-lang" : "")">
         <MudAppBar Elevation="20">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
-                        Title="Toggle navigation sidebar"
-                        Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
-
+            <AuthorizeView>
+                <Authorized>
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
+                                   Title="Toggle navigation sidebar"
+                                   Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
+                </Authorized>
+                <NotAuthorized>
+                    <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit"
+                    Href="/" Title="Navigate to the home page"
+                                      Size="Size.Large" Edge="Edge.Start" />
+                </NotAuthorized>
+            </AuthorizeView>
             @if (SortDisabled is false)
             {
                 <MudTooltip Text="@(_isReversed ? "Sort conversations with latest answers on bottom" : "Sort conversations with latest answers on top")"
@@ -103,6 +111,7 @@
     {
         await SignOutManager.SetSignOutState();
         NavManager.NavigateTo("authentication/logout");
+        NavManager.NavigateTo("/");
     }
     private void OnLogInClicked()
     {
