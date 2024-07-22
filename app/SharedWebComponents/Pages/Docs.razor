@@ -122,12 +122,12 @@
                     <MudProgressCircular Indeterminate="true"
                     Size="Size.Small" Class="ml-2" />
                 }
-                else if (_isDeletingDocuments)
+                else if (DeleteService.getIsDeleting())
                 {
                     <MudText Typo="Typo.h5">
                         Deleting Documents
                     </MudText>
-                    <MudProgressCircular Indeterminate="false" Value="@_deleteProgress"
+                    <MudProgressCircular Indeterminate="false" Value="@DeleteService.getDeleteProgress()"
                         Size="Size.Small" Class="ml-2" Color="Color.Error"/>
                 }
                 else
@@ -208,7 +208,7 @@
                 </MudTd>
                 <MudTd DataLabel="Delete" Style="text-align:center">
                     <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Delete"
-                            Disabled=@(_isDeletingDocuments)
+                            Disabled=@(DeleteService.getIsDeleting())
                             Size="Size.Small" OnClick="@(() => OnDeleteAsync(manager, context.Name))" />
                 </MudTd>
             </RowTemplate>

@@ -2,6 +2,7 @@
 @inject NavigationManager NavManager
 @inject IAccessTokenProvider AccessTokenProvider
 @inject SignOutSessionStateManager SignOutManager
+
 <MudThemeProvider @bind-IsDarkMode="@_isDarkTheme" Theme="_theme" />
 <MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Small"
                    CloseButton="true"
@@ -87,11 +88,11 @@
             <MudDivider Style="flex-grow: 0;" />
             <NavMenu />
         </MudDrawer>
-        @if (_isDeletingDocuments)
+        @if (DeleteService.getIsDeleting())
         {
             <MudPaper Class="fab-component" Elevation="3" Square="false">
                 <MudText Typo="Typo.h4" Class="fab-text">Deleting</MudText>
-                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Primary" Size="Size.Medium" Value="100" />
+                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Error" Size="Size.Medium" Value="DeleteService.getDeleteProgress()" />
             </MudPaper>
 
         }
@@ -108,11 +109,11 @@
                 <CascadingValue Value="_settingsPanel?.Settings" Name="Settings">
                     <CascadingValue Value="Settings2" Name="Settings2">
                         <CascadingValue Value="_isReversed" Name="IsReversed">
-                            <CascadingValue Value="_isDeletingDocuments">
-                                <CascadingValue Value="_isUploadingDocuments">
-                                    <CascadingValue Value="UploadDocumentsEvent">
-                                        @Body
-                                    </CascadingValue>
+                            <CascadingValue Value="UploadDocumentsEvent">
+                                <CascadingValue Value="DeleteDocumentsEvent">
+                                     <CascadingValue Value="_isUploadingDocuments">
+                                         @Body
+                                     </CascadingValue>
                                 </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>

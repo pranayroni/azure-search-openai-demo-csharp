@@ -12,6 +12,4 @@ public class UploadDocumentsArgs
     public IReadOnlyList<IBrowserFile> Files { get; set; }
     public string Category { get; set; }
     public bool Success { get; set; }
-    public int? UploadedFilesCount { get; set; }
-    public string? ErrorMessage { get; set; }
 }
