@@ -45,7 +45,6 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   properties: {
     model: deployment.model
     raiPolicyName: contains(deployment, 'raiPolicyName') ? deployment.raiPolicyName : null
-    disableLocalAuth: false
   }
   sku: contains(deployment, 'sku') ? deployment.sku : {
     name: 'Standard'
