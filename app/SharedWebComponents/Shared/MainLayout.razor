@@ -1,5 +1,7 @@
 ﻿@inherits             LayoutComponentBase
 @inject NavigationManager NavManager
+@inject IAccessTokenProvider AccessTokenProvider
+@inject SignOutSessionStateManager SignOutManager
 <MudThemeProvider @bind-IsDarkMode="@_isDarkTheme" Theme="_theme" />
 <MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Small"
                    CloseButton="true"
@@ -14,10 +16,18 @@
 <MudRTLProvider RightToLeft="_isRightToLeft">
     <MudLayout class="@(_isRightToLeft ? "rtl-lang" : "")">
         <MudAppBar Elevation="20">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
-                        Title="Toggle navigation sidebar"
-                        Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
-
+            <AuthorizeView>
+                <Authorized>
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
+                                   Title="Toggle navigation sidebar"
+                                   Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
+                </Authorized>
+                <NotAuthorized>
+                    <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit"
+                    Href="/" Title="Navigate to the home page"
+                                      Size="Size.Large" Edge="Edge.Start" />
+                </NotAuthorized>
+            </AuthorizeView>
             @if (SortDisabled is false)
             {
                 <MudTooltip Text="@(_isReversed ? "Sort conversations with latest answers on bottom" : "Sort conversations with latest answers on top")"
@@ -41,6 +51,7 @@
                 
             }
             <MudSpacer />
+           
             @if (SettingsDisabled is false)
                     {
             <MudIconButton Icon="@Icons.Material.Filled.Settings" style="@($"{(_isDarkTheme ? Colors.Brown.Default : Colors.Cyan.Default)}")" Size="Size.Large"
@@ -51,7 +62,22 @@
                                 ToggledSize="Size.Large"
                                  Title="Switch to Dark theme" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit"
                                 ToggledTitle="Switch to Light theme" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Warning />
-            <LogoutDisplay />
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenu Color="@Color.Inherit" Label="@context.User.Identity.Name">
+                        <MudMenuItem IconSize="Size.Small" OnClick="@OnUserInfoClicked" IconColor="Color.Primary" Icon="@Icons.Material.Rounded.Person">View Info</MudMenuItem>
+                        <MudMenuItem IconSize="Size.Small" OnClick="@OnLogOutClicked" IconColor="Color.Primary" Icon="@Icons.Material.Rounded.SensorDoor">Log Out</MudMenuItem>
+                    </MudMenu>
+                </Authorized>
+                <NotAuthorized>
+                    <MudButton Href="authentication/login"
+                               Variant="Variant.Text"
+                               EndIcon="@Icons.Custom.Brands.Microsoft"
+                               Color="Color.Inherit">
+                        Log In
+                    </MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
         </MudAppBar>
         <MudDrawer @bind-Open="_drawerOpen" Elevation="5" id="drawer">
             <MudDrawerHeader>
@@ -61,12 +87,34 @@
             <MudDivider Style="flex-grow: 0;" />
             <NavMenu />
         </MudDrawer>
+        @if (_isDeletingDocuments)
+        {
+            <MudPaper Class="fab-component" Elevation="3" Square="false">
+                <MudText Typo="Typo.h4" Class="fab-text">Deleting</MudText>
+                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Primary" Size="Size.Medium" Value="100" />
+            </MudPaper>
+
+        }
+        @if (_isUploadingDocuments)
+        {
+            <MudPaper Class="fab-component" Elevation="3" Square="false">
+                <MudText Typo="Typo.h4" Class="fab-text">Uploading</MudText>
+                <MudProgressLinear Indeterminate="false" Striped="true" Color="Color.Primary" Size="Size.Medium" Value="100" />
+            </MudPaper>
+        }
+        
         <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.Large" Fixed="false" Class="my-6 pt-6">
                 <CascadingValue Value="_settingsPanel?.Settings" Name="Settings">
                     <CascadingValue Value="Settings2" Name="Settings2">
                         <CascadingValue Value="_isReversed" Name="IsReversed">
-                            @Body
+                            <CascadingValue Value="_isDeletingDocuments">
+                                <CascadingValue Value="_isUploadingDocuments">
+                                    <CascadingValue Value="UploadDocumentsEvent">
+                                        @Body
+                                    </CascadingValue>
+                                </CascadingValue>
+                            </CascadingValue>
                         </CascadingValue>
                     </CascadingValue>
                 </CascadingValue>
@@ -74,4 +122,22 @@
             <SettingsPanel @ref="_settingsPanel" @bind-Open="@_settingsOpen" />
         </MudMainContent>
     </MudLayout>
+
 </MudRTLProvider>
+
+@code {
+    private void OnUserInfoClicked()
+    {
+        NavManager.NavigateTo("user");
+    }
+    private async void OnLogOutClicked()
+    {
+        await SignOutManager.SetSignOutState();
+        NavManager.NavigateTo("authentication/logout");
+        NavManager.NavigateTo("/");
+    }
+    private void OnLogInClicked()
+    {
+        NavManager.NavigateTo("authentication/login");
+    }
+}

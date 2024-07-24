@@ -9,6 +9,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using static MudBlazor.Colors;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
+using static MudBlazor.CategoryTypes;
+using SharedWebComponents.Pages;
+using System.Reflection;
 
 
 
@@ -17,9 +22,16 @@ namespace SharedWebComponents.Shared;
 public sealed partial class MainLayout
 {
     private readonly MudTheme _theme = new();
-    private bool _drawerOpen = true;
+    private bool _drawerOpen = false;
     private bool _settingsOpen = false;
     private SettingsPanel? _settingsPanel;
+    public required ILogger<MainLayout> Logger { get; set; }
+
+    private const long MaxIndividualFileSize = 1_024L * 1_024;
+
+    public EventCallback<UploadDocumentsArgs> UploadDocumentsEvent =>
+        EventCallback.Factory.Create<UploadDocumentsArgs>(this, UploadDocumentsAsync);
+
 
     private bool _isDarkTheme
     {
@@ -39,6 +51,7 @@ public sealed partial class MainLayout
     [Inject] public required NavigationManager Nav { get; set; }
     [Inject] public required ILocalStorageService LocalStorage { get; set; }
     [Inject] public required IDialogService Dialog { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
 
     public RequestSettingsOverrides Settings2 { get; set; } = new();
 
@@ -55,6 +68,55 @@ public sealed partial class MainLayout
     private readonly HashSet<string> _categories = [];
     private Task _getCategoriesTask = null!;
     private bool _isLoadingCategories = false;
+
+    private bool _isUploadingDocuments = false;
+    private bool _isDeletingDocuments = false;
+    private EventCallback<bool> _popupVisibleChanged;
+    private EventCallback<bool> PopupVisibleChanged
+    {
+        get
+        {
+            if (_popupVisibleChanged.Equals(EventCallback<bool>.Empty))
+            {
+                if (_isUploadingDocuments)
+                {
+                    _popupVisibleChanged = EventCallback.Factory.Create<bool>(this, s => _isUploadingDocuments = s);
+
+                }
+                if(_isDeletingDocuments)
+                {
+                    _popupVisibleChanged = EventCallback.Factory.Create<bool>(this, s => _isDeletingDocuments = s);
+                }
+            }
+            return _popupVisibleChanged;
+        }
+    }
+
+    private async void UploadDocumentsAsync (UploadDocumentsArgs args)
+    {
+        _isUploadingDocuments = true;
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
+
+        var cancellationToken = _cancellationTokenSource.Token;
+        var result = await Client.UploadDocumentsAsync(
+            args.Files, MaxIndividualFileSize, cookie,
+            args.Category, cancellationToken);
+
+        if (result.IsSuccessful)
+        {
+            args.Success = true;
+            args.UploadedFilesCount = result.UploadedFiles.Length;
+        }
+        else
+        {
+            args.Success = false;
+            args.ErrorMessage = result.Error;
+        }
+        _isUploadingDocuments = false;
+        StateHasChanged();
+
+    }
+
 
     private bool SettingsDisabled => new Uri(Nav.Uri).Segments.LastOrDefault().TrimEnd('/') switch
     {
@@ -76,6 +138,9 @@ public sealed partial class MainLayout
 
     protected override void OnInitialized()
     {
+
+        _isDeletingDocuments = false;
+        _isUploadingDocuments = false;
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         Settings2.Overrides.ExcludeCategory = new List<string>();
