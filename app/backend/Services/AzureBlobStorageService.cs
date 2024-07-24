@@ -26,7 +26,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
             string formRecognizerServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_FORMRECOGNIZER_SERVICE_ENDPOINT") ?? string.Empty;
             string storageBlobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? string.Empty;*/
 
-            string openAiEndpoint = "https://cog-r6lomx22dqabk.openai.azure.com/";
+            string openAiEndpoint = "https://docbot-aoai.openai.azure.com/";
             string embeddingDeployment = "embedding";
             string searchServiceEndpoint = "https://gptkb-r6lomx22dqabk.search.windows.net/";
             string searchIndex = "gptkbindex";
