@@ -155,7 +155,7 @@ param webIdentityName string = ''
 param webImageName string = ''
 
 @description('Use Azure OpenAI service')
-param useAOAI bool = true
+param useAOAI bool
 
 @description('OpenAI API Key')
 param openAIApiKey string
