@@ -386,6 +386,7 @@ module azureOpenAi 'core/ai/cognitiveservices.bicep' = if (useAOAI) {
     name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: openAiResourceGroupLocation
     tags: updatedTags
+	localAuth: false
     sku: {
       name: openAiSkuName
     }
