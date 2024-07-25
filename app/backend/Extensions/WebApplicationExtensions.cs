@@ -48,6 +48,8 @@ internal static class WebApplicationExtensions
 
         api.MapPost("delete/embeddings", OnPostDeleteEmbeddingsAsync);
 
+        api.MapPost("sourcefiles", OnPostSourceDocumentsAsync);
+
 
 
         return app;
@@ -230,6 +232,34 @@ internal static class WebApplicationExtensions
             }
         }
     }
+
+    private static async Task<IResult> OnPostSourceDocumentsAsync(
+    [FromBody] FileNamesRequest request,
+    [FromServices] BlobServiceClient blobServiceClient,
+    CancellationToken cancellationToken)
+    {
+        Console.WriteLine("Received file names: " + string.Join(", ", request.FileNames)); // Debug statement
+
+        var containerClient = blobServiceClient.GetBlobContainerClient("content");
+        var sourceFiles = new List<Uri>();
+
+        foreach (var fileName in request.FileNames)
+        {
+            var blobClient = containerClient.GetBlobClient(fileName);
+            if (await blobClient.ExistsAsync(cancellationToken))
+            {
+                sourceFiles.Add(blobClient.Uri);
+            }
+            else
+            {
+                return Results.NotFound($"File {fileName} not found.");
+            }
+        }
+
+        return Results.Ok(sourceFiles);
+    }
+
+
 
     private static async Task<IResult> OnPostDeleteBlobsAsync(
         DeleteRequest deleteRequest,

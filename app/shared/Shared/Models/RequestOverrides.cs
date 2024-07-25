@@ -6,19 +6,19 @@ namespace Shared.Models;
 public record RequestOverrides
 {
     [JsonPropertyName("semantic_ranker")]
-    public bool SemanticRanker { get; set; } = false;
+    public bool SemanticRanker { get; set; } = true;
 
     [JsonPropertyName("retrieval_mode")]
-    public RetrievalMode RetrievalMode { get; set; } = RetrievalMode.Vector; // available option: Text, Vector, Hybrid
+    public RetrievalMode RetrievalMode { get; set; } = RetrievalMode.Hybrid; // available option: Text, Vector, Hybrid
 
     [JsonPropertyName("semantic_captions")]
-    public bool? SemanticCaptions { get; set; }
+    public bool? SemanticCaptions { get; set; } = false;
 
     [JsonPropertyName("exclude_category")]
     public IEnumerable<string>? ExcludeCategory { get; set; }
 
     [JsonPropertyName("top")]
-    public int? Top { get; set; } = 3;
+    public int? Top { get; set; } = 5;
 
     [JsonPropertyName("temperature")]
     public int? Temperature { get; set; }
