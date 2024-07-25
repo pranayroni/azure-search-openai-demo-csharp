@@ -383,7 +383,7 @@ module azureOpenAi 'core/ai/cognitiveservices.bicep' = if (useAOAI) {
   name: 'openai'
   // scope: azureOpenAiResourceGroup
   params: {
-    name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}-sp'
+    name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: openAiResourceGroupLocation
     tags: updatedTags
 	localAuth: false
