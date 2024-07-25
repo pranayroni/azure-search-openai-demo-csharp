@@ -101,7 +101,7 @@ param logAnalyticsName string = ''
 param openAiResourceGroupName string = ''
 
 @description('Name of the OpenAI service')
-param openAiServiceName string = 'doc-sp-aoai'
+param openAiServiceName string = ''
 
 @description('SKU name for the OpenAI service. Default: S0')
 param openAiSkuName string = 'S0'
