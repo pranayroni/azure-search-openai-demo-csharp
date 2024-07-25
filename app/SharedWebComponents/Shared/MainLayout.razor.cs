@@ -27,12 +27,6 @@ public sealed partial class MainLayout
     private SettingsPanel? _settingsPanel;
     public required ILogger<MainLayout> Logger { get; set; }
 
-    private const long MaxIndividualFileSize = 1_024L * 1_024;
-
-    public EventCallback<UploadDocumentsArgs> UploadDocumentsEvent =>
-        EventCallback.Factory.Create<UploadDocumentsArgs>(this, UploadDocumentsAsync);
-
-
     private bool _isDarkTheme
     {
         get => LocalStorage.GetItem<bool>(StorageKeys.PrefersDarkTheme);
@@ -52,6 +46,8 @@ public sealed partial class MainLayout
     [Inject] public required ILocalStorageService LocalStorage { get; set; }
     [Inject] public required IDialogService Dialog { get; set; }
     [Inject] public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required DeleteService DeleteService { get; set; }
 
     public RequestSettingsOverrides Settings2 { get; set; } = new();
 
@@ -68,53 +64,93 @@ public sealed partial class MainLayout
     private readonly HashSet<string> _categories = [];
     private Task _getCategoriesTask = null!;
     private bool _isLoadingCategories = false;
-
     private bool _isUploadingDocuments = false;
-    private bool _isDeletingDocuments = false;
-    private EventCallback<bool> _popupVisibleChanged;
-    private EventCallback<bool> PopupVisibleChanged
-    {
-        get
-        {
-            if (_popupVisibleChanged.Equals(EventCallback<bool>.Empty))
-            {
-                if (_isUploadingDocuments)
-                {
-                    _popupVisibleChanged = EventCallback.Factory.Create<bool>(this, s => _isUploadingDocuments = s);
 
-                }
-                if(_isDeletingDocuments)
-                {
-                    _popupVisibleChanged = EventCallback.Factory.Create<bool>(this, s => _isDeletingDocuments = s);
-                }
-            }
-            return _popupVisibleChanged;
-        }
-    }
+    private const long MaxIndividualFileSize = 1_024L * 1_024;
 
-    private async void UploadDocumentsAsync (UploadDocumentsArgs args)
+
+    public EventCallback<UploadDocumentsArgs> UploadDocumentsEvent =>
+        EventCallback.Factory.Create<UploadDocumentsArgs>(this, UploadDocumentsAsync);
+    public EventCallback<string> DeleteDocumentsEvent =>
+        EventCallback.Factory.Create<string>(this, DeleteDocumentsAsync);
+
+
+    private async Task UploadDocumentsAsync (UploadDocumentsArgs args)
     {
         _isUploadingDocuments = true;
+        StateHasChanged();
+        Snackbar.Add(
+               $"Uploading documents. " +
+               $"This may take a couple of minutes, please be patient. " +
+               $"You will not be able to upload additional documents during this time.",
+               Severity.Success,
+               static options =>
+               {
+                   options.ShowCloseIcon = true;
+               });
         var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
 
         var cancellationToken = _cancellationTokenSource.Token;
         var result = await Client.UploadDocumentsAsync(
             args.Files, MaxIndividualFileSize, cookie,
             args.Category, cancellationToken);
+        var fileCount = args.Files.Count;
 
         if (result.IsSuccessful)
         {
             args.Success = true;
-            args.UploadedFilesCount = result.UploadedFiles.Length;
+            Snackbar.Add(
+                    $"Uploaded {result.UploadedFiles.Length} documents.",
+                    Severity.Success,
+                    static options =>
+                    {
+                        options.ShowCloseIcon = true;
+                        options.VisibleStateDuration = 10_000;
+                    });
         }
         else
         {
             args.Success = false;
-            args.ErrorMessage = result.Error;
+            Snackbar.Add(
+                    result.Error,
+                    Severity.Error,
+                    static options =>
+                    {
+                        options.ShowCloseIcon = true;
+                        options.VisibleStateDuration = 10_000;
+                    });
+
         }
         _isUploadingDocuments = false;
         StateHasChanged();
 
+    }
+
+    private async Task DeleteDocumentsAsync (string fileName)
+    {
+        DeleteService.UpdateIsDeleting(true);
+        DeleteService.UpdateDeleteProgress(10);
+        Snackbar.Add(
+             $"Deleting {fileName}. " +
+             $"This may take a couple of minutes, please be patient. " +
+             $"You will not be able to delete other documents during this time.",
+             Severity.Success,
+             static options =>
+             {
+                 options.ShowCloseIcon = true;
+                 options.VisibleStateDuration = 10_000;
+             });
+        DeleteRequest deleteRequest = new()
+        {
+            file = fileName
+        };
+        var cancellationToken = _cancellationTokenSource.Token;
+        await Client.RequestDeleteBlobsAsync(deleteRequest, cancellationToken);
+        DeleteService.UpdateDeleteProgress(50);
+        await Client.RequestDeleteEmbeddingsAsync(deleteRequest, cancellationToken);
+        DeleteService.UpdateDeleteProgress(100);
+        await Task.Delay(300);
+        DeleteService.UpdateIsDeleting(false);
     }
 
 
@@ -138,9 +174,7 @@ public sealed partial class MainLayout
 
     protected override void OnInitialized()
     {
-
-        _isDeletingDocuments = false;
-        _isUploadingDocuments = false;
+        DeleteService.OnChange += StateHasChanged;
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         Settings2.Overrides.ExcludeCategory = new List<string>();
@@ -169,6 +203,13 @@ public sealed partial class MainLayout
             return cList.AsEnumerable<string>();
         }
         return await Task.FromResult(cList.Where(x => x.Contains(search, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        DeleteService.OnChange -= StateHasChanged;
+
     }
 
 }

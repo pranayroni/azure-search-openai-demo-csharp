@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Newtonsoft.Json.Linq;
+using SharedWebComponents.Shared;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SharedWebComponents.Pages;
@@ -15,7 +16,6 @@ public sealed partial class Docs : IDisposable
     private Task _getCategoriesTask = null!;
     private bool _isLoadingCategories = false;
     private bool _isLoadingDocuments = false;
-    private int _deleteProgress { get; set; }
     private int _uploadProgress { get; set; }
 
     private string _filter = "";
@@ -28,8 +28,9 @@ public sealed partial class Docs : IDisposable
     public List<string>? cList = null;
 
     [CascadingParameter] public bool _isUploadingDocuments { get; set; }
-    [CascadingParameter] public bool _isDeletingDocuments { get; set; }
     [CascadingParameter] public EventCallback<UploadDocumentsArgs> UploadDocumentsEvent { get; set; }
+    [CascadingParameter] public EventCallback<string> DeleteDocumentsEvent { get; set; }
+
 
     [Inject]
     public required ApiClient Client { get; set; }
@@ -45,6 +46,8 @@ public sealed partial class Docs : IDisposable
 
     [Inject]
     public required IPdfViewer PdfViewer { get; set; }
+    [Inject]
+    public required DeleteService DeleteService { get; set; }
 
     private bool FilesSelected => _fileUpload is { Files.Count: > 0 };
 
@@ -53,6 +56,7 @@ public sealed partial class Docs : IDisposable
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         category = new List<string>();
+        DeleteService.OnChange += StateHasChanged;
         _getDocumentsTask = GetDocumentsAsync();
         _getCategoriesTask = GetCategoriesAsync();
     }
@@ -99,22 +103,9 @@ public sealed partial class Docs : IDisposable
 
     private async Task SubmitFilesForUploadAsync()
     {
-        //_isUploadingDocuments = true;
-        // Add the beforeunload event listener at the start of the upload process
-        //await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
 
         if (_fileUpload is { Files.Count: > 0 })
         {
-            
-            Snackbar.Add(
-                $"Uploading documents. " +
-                $"This may take a couple of minutes, please be patient. " +
-                $"You will not be able to upload additional documents during this time.",
-                Severity.Success,
-                static options =>
-                {
-                    options.ShowCloseIcon = true;
-                });
 
             UploadDocumentsArgs args = new()
             {
@@ -129,29 +120,7 @@ public sealed partial class Docs : IDisposable
             {
                 //await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
                 manager.NavigateTo(manager.Uri, true);
-                Snackbar.Add(
-                    $"Uploaded {args.UploadedFilesCount} documents.",
-                    Severity.Success,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
-                //_isUploadingDocuments = false;
                 await _fileUpload.ResetAsync();
-            }
-            else
-            {
-                Snackbar.Add(
-                    args.ErrorMessage,
-                    Severity.Error,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
-                //await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
-                //_isUploadingDocuments = false;
             }
         }
         
@@ -162,35 +131,13 @@ public sealed partial class Docs : IDisposable
 
     private async ValueTask OnDeleteAsync(NavigationManager manager, string fileName)
     {
-        _deleteProgress = 10;
-        _isDeletingDocuments = true;
-        await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
+        
+        //await JSRuntime.InvokeVoidAsync("addBeforeUnloadListener");
         var index = fileName.LastIndexOf("-");
         fileName = fileName.Substring(0, index) + ".pdf";
-        Snackbar.Add(
-             $"Deleting {fileName}. " +
-             $"This may take a couple of minutes, please be patient. " +
-             $"You will not be able to delete other documents during this time.",
-             Severity.Success,
-             static options =>
-             {
-                 options.ShowCloseIcon = true;
-                 options.VisibleStateDuration = 10_000;
-             });
-        DeleteRequest deleteRequest = new()
-        {
-            file = fileName
-        };
-        var cancellationToken = _cancellationTokenSource.Token;
-        await Client.RequestDeleteBlobsAsync(deleteRequest, cancellationToken);
-        _deleteProgress = 50;
-        StateHasChanged();
-        await Client.RequestDeleteEmbeddingsAsync(deleteRequest, cancellationToken);
-        _deleteProgress = 100;
-        StateHasChanged();
-        await Task.Delay(300);
-        await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
-        _isDeletingDocuments = false;
+        
+        await DeleteDocumentsEvent.InvokeAsync(fileName);
+        //await JSRuntime.InvokeVoidAsync("removeBeforeUnloadListener");
         manager.NavigateTo(manager.Uri, true);
 
     }
@@ -205,7 +152,11 @@ public sealed partial class Docs : IDisposable
         
     }
 
-    public void Dispose() => _cancellationTokenSource.Cancel();
-    
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        DeleteService.OnChange -= StateHasChanged;
+
+    }
 
 }
