@@ -2,10 +2,14 @@
 
 using System.Text;
 using Azure.Core;
+using Humanizer;
 using Microsoft.Identity.Client;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Embeddings;
+using SharedWebComponents.Components;
+using SharedWebComponents.Pages;
+using static MudBlazor.CategoryTypes;
 
 namespace MinimalApi.Services;
 #pragma warning disable SKEXP0011 // Mark members as static
@@ -70,6 +74,9 @@ public class ReadRetrieveReadChatService
         RequestOverrides? overrides,
         CancellationToken cancellationToken = default)
     {
+        var dateTime = DateTime.Now;
+        var year = dateTime.Year;
+
         var top = overrides?.Top ?? 3;
         var useSemanticCaptions = overrides?.SemanticCaptions ?? false;
         var useSemanticRanker = overrides?.SemanticRanker ?? false;
@@ -92,7 +99,7 @@ public class ReadRetrieveReadChatService
             ? userQuestion.Replace("knipper", string.Empty)
             : throw new InvalidOperationException("Use question is null");
 
-        question += " 2024";
+        question += " " + year;
 
         string[]? followUpQuestionList = null;
         if (overrides?.RetrievalMode != RetrievalMode.Text && embedding is not null)
@@ -105,12 +112,11 @@ public class ReadRetrieveReadChatService
         string? query = null;
         if (overrides?.RetrievalMode != RetrievalMode.Vector)
         {
-            var getQueryChat = new ChatHistory(@"You are a helpful AI assistant, generate search query for followup question.
-Make your response simple and precise. Return the query only, do not return any other text. Your query should start with the keywords Knipper and the current year.
-e.g.
-Knipper 2024 Health Plus AND standard plan.
-Knipper 2024 standard plan AND dental AND employee benefit.
-");
+            var getQueryChat = new ChatHistory("You are a helpful AI assistant, generate search query for following question. " +
+                "Make your response simple and precise. Return the query only, do not return any other text. " +
+                "Your query should include the keywords Knipper and {year} if the question is related to time. " +
+                "e.g. Knipper {year} holiday schedule. " +
+                "e.g. Knipper AOC rules Agile. e.g. Knipper Health Plus AND standard plan.");
 
             getQueryChat.AddUserMessage(question);
             var result = await chat.GetChatMessageContentAsync(
@@ -118,6 +124,8 @@ Knipper 2024 standard plan AND dental AND employee benefit.
                 cancellationToken: cancellationToken);
 
             query = result.Content ?? throw new InvalidOperationException("Failed to get search query");
+            Console.WriteLine("query = " + query);
+
         }
 
         // step 2
@@ -146,8 +154,9 @@ Knipper 2024 standard plan AND dental AND employee benefit.
         // step 3
         // put together related docs and conversation history to generate answer
         var answerChat = new ChatHistory(
-            "You are a system assistant who helps the company employees with their questions. Be brief in your answer. " +
-            "Answer ONLY with the facts listed in the provided sources. " +
+            "You are an AI assistant helps Knipper employees with questions about the employee handbook " +
+            "and other documents such as Standard Operation Procedures and business rules with client companies. " +
+            "Answer only with the facts listed in the provided sources. " +
             "If you cannot find the answer in the sources, reply with 'I don't know.'. " +
             "If asking a clarifying question to the user would help, ask the question. " +
             "For tabular information return it as an html table. Do not return markdown format. " +
@@ -165,17 +174,17 @@ Knipper 2024 standard plan AND dental AND employee benefit.
                 answerChat.AddAssistantMessage(message.Content);
             }
         }
-
-        
         if (images != null)
         {
             var prompt = @$"## Source ##
-{documentContents}
+
+            {documentContents}
 ## End ##
 
-Answer question based on available source and images.
+Answer question based on available sources and images.
 Your answer needs to be a json object with answer and thoughts field.
-Don't put your answer between ```json and ```, return the json string directly. e.g {{""answer"": ""I don't know"", ""thoughts"": ""I don't know""}}";
+Don't put your answer between ```json and ```, return the json string directly. e.g {{""answer"": ""I don't know"", ""thoughts"": ""I don't know""}}
+            ";
 
             var tokenRequestContext = new TokenRequestContext(new[] { "https://storage.azure.com/.default" });
             var sasToken = await (_tokenCredential?.GetTokenAsync(tokenRequestContext, cancellationToken) ?? throw new InvalidOperationException("Failed to get token"));
@@ -252,7 +261,7 @@ You answer needs to be a json object with the following format.
         if (overrides?.SuggestFollowupQuestions is true)
         {
             var followUpQuestionChat = new ChatHistory(@"You are a helpful AI assistant");
-            followUpQuestionChat.AddUserMessage($@"Generate three follow-up question based on the answer you just generated.
+            followUpQuestionChat.AddUserMessage($@"Generate three follow-up question the user may ask based on the answer you just generated.
 # Answer
 {ans}
 
@@ -296,15 +305,16 @@ e.g.
 
         return new ChatAppResponse(new[] { choice });
     }
-
     private ChatCompletionsOptions GetChatCompletionsOptions(string deploymentId, ChatMessage[] history)
     {
-
+        var dateTime = DateTime.Now;
+        var date = dateTime.Date;
         ChatCompletionsOptions chatCompletionsOptions = new ChatCompletionsOptions
         {
             DeploymentName = deploymentId,
             Messages = { new ChatRequestSystemMessage(
-                "You are a system assistant who helps the company employees with their questions. Be brief in your answer. " +
+                "You are a system assistant who helps the company employees with their questions. " +
+                "Be precise and detailed in your answer. The current date is {date}" +
                 "Start your message with 'I could not find an answer in the provided documents. According to the internet, ' " +
                 "and then answer the question based on general knowlegde or the internet. " +
                 "If asking a clarifying question to the user would help, ask the question. " +
