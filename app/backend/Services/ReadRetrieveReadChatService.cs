@@ -123,7 +123,7 @@ public class ReadRetrieveReadChatService
                 getQueryChat,
                 cancellationToken: cancellationToken);
 
-            query = result.Content ?? throw new InvalidOperationException("Failed to get search query");
+            query = result.Content ?? question;
             Console.WriteLine("query = " + query);
 
         }
