@@ -209,7 +209,7 @@ All Backend API endpoints are prefixed with `/api`. They are called by the front
         "contentType":"application/pdf",
         "size":87601,
         "lastModified":"2024-07-23T13:50:57+00:00",
-        "url":"https://str6lomx22dqabk.blob.core.windows.net:443/content/2021%20Remote%20Work%20Pilot%20(Update%20Nov%202021)-0.pdf",
+        "url":"https://{storage_container_name}.blob.core.windows.net:443/content/2021%20Remote%20Work%20Pilot%20(Update%20Nov%202021)-0.pdf",
         "status":0,
         "embeddingType":0
     },
@@ -240,7 +240,8 @@ All Backend API endpoints are prefixed with `/api`. They are called by the front
 }
 ```
 ##### [url]/api/chat:
-- **POST**: Sends the lastest chat along with the chat history to generate a response.
+- **POST**: Sends the lastest chat along with the chat history to generate a response. 
+Citations are marked in square brackets [] and follow-up questions are marked in <<>>.
     - Example Request:
 ```
 
@@ -284,6 +285,52 @@ All Backend API endpoints are prefixed with `/api`. They are called by the front
     }
 }
 ```
+ - Example Response:
+ ```
+ {
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "The Quality Council is a cross-functional team ... [QA-045-15.pdf]. Departments include ... [QA-021-2.pdf]. <<What are the main responsibilities of the Quality Council?>>  <<...>> "
+            },
+            "context": {
+                "dataPointsContent": [
+                    {
+                        "title": "QA-021-0.pdf",
+                        "content": "of this procedure is ..."
+                    },
+                    { ... }
+                ],
+                "dataPointsImages": null,
+                "followup_questions": [
+                    "What are the main responsibilities of the Quality Council?",
+                    "..."
+                ],
+                "thoughts": [
+                    {
+                        "title": "Thoughts",
+                        "description": "I utilized multiple sources ...",
+                        "props": null
+                    }
+                ],
+                "data_points": {
+                    "text": [
+                        "QA-021-0.pdf: of this procedure is ...",
+                        "QA-021-1.pdf:  Those in attendance ...",
+                        "foo.pdf: ..."
+                    ]
+                },
+                "thoughtsString": "Thoughts: I utilized multiple sources ..."
+            },
+            "citationBaseUrl": "https://{storage_container_name}.blob.core.windows.net/content",
+            "content_filter_results": null
+        }
+    ]
+}
+ ```
+
 ##### [url]/api/categories:
 - **GET**: Retrieves a list of all categories given to documents.
 - Example Response:
@@ -325,8 +372,8 @@ All Backend API endpoints are prefixed with `/api`. They are called by the front
     - Example Response:
 ```
 [
-    "https://str6lomx22dqabk.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-0.pdf",
-    "https://str6lomx22dqabk.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-1.pdf"
+    "https://{storage_container_name}.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-0.pdf",
+    "https://{storage_container_name}.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-1.pdf"
 ]
 ``` 
 
