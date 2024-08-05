@@ -1,17 +1,21 @@
-## Document Bot Documentation
+# Document Bot Documentation
 
-### Table of Contents
+## Table of Contents
 
-#### 1. [Introduction](#introduction)
-#### 2. [Deployment](#deployment)
-#### 3. [API](#api)
-#### 4. [Usage](#usage)
+### 1. [Introduction](#introduction)
+### 2. [Deployment](#deployment)
+### 3. [Preparing Documents](#preparing-documents)
+### 4. [API](#api)
+### 5. [Usage](#usage)
 
 ---
 
-### 1. Introduction
+## 1. Introduction
 
 Welcome to Knipper's Document Bot. This project aims to provide a comprehensive solution for managing documents and interacting with the contained data through a chat-based interface.
+We use Retrieval Augmented Generation (RAG) to generate responses that are understandable within the context of the conversation, but also accurate with details from the provided documents.
+
+![RAG Architecture](../docs/appcomponents.png)
 
 Key features of the Document Bot include:
 - **Chat-Based Interaction**: Engage in conversations about documents, ask questions, and receive real-time responses.
@@ -23,7 +27,7 @@ This documentation will guide you through the deployment, API usage, and general
 
 ---
 
-### 2. Deployment
+## 2. Deployment
 
 ### 2.1. Prerequisites
 In order to deploy and run this project, you'll need
@@ -181,24 +185,70 @@ Run the following if you want to give someone else access to the deployed and ex
 
 Run `azd down`
 
-### 3. API
-#### 3.1. Frontend API
-##### [url]:
+## 3. Preparing Documents
+### 3.1. Document Format
+The Document Bot is designed to work with PDF documents. When uploading documents, ensure they are in PDF format. 
+The Document Bot will extract text from these documents to generate responses to user queries.
+Currently, no other format of documents is supported.
+
+### 3.2. Document Upload
+To upload documents to the Document Bot in mass, use the PrepareDocs startup item. This will allow you to upload a large quantity of documents at once, with varying categories.
+This startup item runs a script that uploads all documents in the `data` folder to the database.
+Simply move all desired documents to the `data` folder and run the PrepareDocs startup item.
+If a document is already in the database, it will be skipped.
+
+### 3.2.1. Database Creation
+When running the PrepareDocs startup item, the script will create a new knowledge base index if one does not already exist.
+We do not recommend running the PrepareDocs startup item to generate the knowledge base due to settings customization.
+Once documents are uploaded to the knowledge base, some settings may not be changed. 
+Below are examples of our knowledge base fields and semantic configuration.
+![Index Fields](../docs/index-fields.png)
+![Index Semantic Configurations](../docs/index-semantic-config.png)
+
+
+### 3.2.2. Document Categories
+When uploading documents, you can assign one or more categories to each document. These categories are used to filter the documents that the chatbot searches through when generating responses.
+To assign categories when uploading through the PrepareDocs startup item, sort the documents into folders named after the category you wish to assign them. 
+The script will automatically assign the category based on the folder name.
+To add multiple categories to a document, you may use a nested folder structure. For example:
+```
+data
+|-- Business Rules
+|   |-- Document1.pdf
+|   |-- Document2.pdf
+|
+|-- Knipper
+    |-- HR
+    |   |-- Document3.pdf
+    |   |-- Document4.pdf
+    |
+    |-- Document5.pdf
+```
+### 3.3. Document Deletion
+To delete documents from the database using the PrepareDocs startup item, navigate to the `launchSettings.json` file in the `Properties` folder of the `PrepareDocs` project.
+In `launchSettings.json`, add the tag **--removeall** to the `commandLineArgs` string.
+The tag **--removeall** will delete all documents from the database, so use it with caution.
+To delete specific documents, add the tag **--remove** and move the documents you wish to delete into the `data` folder.
+This fuctionality has **NOT** been tested and may not work as intended.
+
+## 4. API
+### 4.1. Frontend API
+#### [url]:
 - **GET**: Returns the homepage of the Document Bot.
-##### [url]/authentication/login:
+#### [url]/authentication/login:
 - **GET**: Sends user to sign in portal with their Microsoft account.
-##### [url]/user:
+#### [url]/user:
 - **GET**: Returns the user's profile information.
-##### [url]/documents:
+#### [url]/documents:
 - **GET**: Returns all documents in the database.
-##### [url]/[chatId]/chat:
+#### [url]/[chatId]/chat:
 - **GET**: Returns the page displaying the chat history assigned to chatId.
 
-#### 3.2. Backend API
+### 4.2. Backend API
 All Backend API endpoints are prefixed with `/api`. They are called by the frontend through `ApiClient.cs` and are used to interact with the backend services. They are defined in `WebApplicationExtensions.cs`.
-##### [url]/api/username:
+#### [url]/api/username:
 - **GET**: *This endpoint is not complete. It is set up to be a framework for user preferences later.*
-##### [url]/api/documents:
+#### [url]/api/documents:
 - **GET**: Retrieves all documents from the database.
     - This response will be extremely large as it contains every document blob in storage.
     - Example Response:
@@ -239,7 +289,7 @@ All Backend API endpoints are prefixed with `/api`. They are called by the front
   "message": "Files uploaded successfully."
 }
 ```
-##### [url]/api/chat:
+#### [url]/api/chat:
 - **POST**: Sends the lastest chat along with the chat history to generate a response. 
 Citations are marked in square brackets [] and follow-up questions are marked in <<>>.
     - Example Request:
@@ -331,7 +381,7 @@ Citations are marked in square brackets [] and follow-up questions are marked in
 }
  ```
 
-##### [url]/api/categories:
+#### [url]/api/categories:
 - **GET**: Retrieves a list of all categories given to documents.
 - Example Response:
 ```
@@ -342,7 +392,7 @@ Citations are marked in square brackets [] and follow-up questions are marked in
     ...
 ]
 ```
-##### [url]/api/delete/blobs:
+#### [url]/api/delete/blobs:
 - **POST**: Deletes a document from the blob storage.
     - Example Request:
 ```
@@ -350,14 +400,14 @@ Citations are marked in square brackets [] and follow-up questions are marked in
     "file":"2024 Holiday Schedule.pdf"
 }
 ```
-##### [url]/api/delete/embeddings:
+#### [url]/api/delete/embeddings:
 - **POST**: Deletes a document's embeddings from the knowledge base.
 ```
 {
     "file":"2024 Holiday Schedule.pdf"
 }
 ```
-##### [url]/api/sourcefiles:
+#### [url]/api/sourcefiles:
 - **POST**: When given a list of document blob names, retrieves the respective links.
     - Example Request:
 ```
@@ -377,28 +427,28 @@ Citations are marked in square brackets [] and follow-up questions are marked in
 ]
 ``` 
 
-### 4. Usage
-#### 4.1. Logging In
+## 5. Usage
+### 5.1. Logging In
 To ensure only authorized Knipper employees can use Document Bot, you must first log in with your Microsoft account. This is done by clicking the "Log In" button on the homepage and following the prompts to sign in with your Microsoft account.
-#### 4.2. Documents
+### 5.2. Documents
 On this page, you can view all documents in the database, search for specific documents, upload new documents, and delete existing documents. Documents are shown not as wholes, but as individual pages.
 
 ***Both Uploading and Deletion occur within the scope of the session. You may switch to other pages within the site, but do not close the tab until uploading or deletion is complete in order to prevent errors in the database.***
 
-#### 4.2.1. Uploading Documents
+### 5.2.1. Uploading Documents
 You can upload documents through the Documents page. Simply select the files you wish to upload, label them with one or more categories, and click "Upload". 
 Up to 10 documents can be uploaded at once. All the uploaded documents in the same batch will be labeled with the same categories. 
 This process may take a few minutes based on the number and size of documents being uploaded.
 When labeling documents, you can search for existing categories through the Multi-Select Autocomplete. To create new categories, you can type in the category name and press enter.
-#### 4.2.2. Deleting Documents
+### 5.2.2. Deleting Documents
 To delete a document, click the trash icon next to the document you wish to delete. Despite the documents being displayed as pages, this action does not delete only that page.
 Deletion will delete all pages of the document selected. 
-#### 4.3. Chat
+### 5.3. Chat
 To chat, press the "New Chat" button to create a new instance of a chat. You can ask it questions about the documents and it will search the database for an answer.
 If no relevant documents are found, the chat search the internet for an answer. 
 Each chat instance maintains its own chat history and can be accessed by clicking on the chat instance in the chat list. 
 Chats will only take into account the chat history of the specific instance they are part of when generating responses.
 You can exclude categories of documents from your chat responses by searching them in the Multi-Select Autocomplete.
-#### 4.4. Profile
+### 5.4. Profile
 The profile page displays your Microsoft account information. This page is not currently used for any functionality, but may be used in the future for account management.
-You may find your auth token to be used in the API here.
+You may find your auth token to be used in the API here, as well as other information for debugging purposes.

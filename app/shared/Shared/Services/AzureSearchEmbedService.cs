@@ -129,16 +129,34 @@ public sealed partial class AzureSearchEmbedService(
             },
             Fields =
             {
-                new SimpleField("id", SearchFieldDataType.String) { IsKey = true, IsFilterable = true },
+                new SimpleField("id", SearchFieldDataType.String) {
+                    IsKey = true,
+                    IsFilterable = true,
+                    IsSortable = true,
+                    IsFacetable = true
+                },
                 new SearchableField("content") { AnalyzerName = LexicalAnalyzerName.EnMicrosoft },
-                new SearchField("category", SearchFieldDataType.Collection(SearchFieldDataType.String)) { IsFacetable = true, IsFilterable = true },
-                new SimpleField("sourcepage", SearchFieldDataType.String) { IsFacetable = true, IsFilterable = true },
-                new SimpleField("sourcefile", SearchFieldDataType.String) { IsFacetable = true, IsFilterable = true },
+                new SearchField("category", SearchFieldDataType.Collection(SearchFieldDataType.String))
+                {
+                    IsFacetable = true,
+                    IsFilterable = true,
+                    IsSearchable = true
+                },
+                new SimpleField("sourcepage", SearchFieldDataType.String) {
+                    IsFacetable = true,
+                    IsFilterable = true,
+                    IsSortable = true,
+                },
+                new SimpleField("sourcefile", SearchFieldDataType.String) {
+                    IsFacetable = true,
+                    IsFilterable = true,
+                    IsSortable = true,
+                },
                 new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single))
                 {
                     VectorSearchDimensions = 1536,
                     IsSearchable = true,
-                    VectorSearchProfileName = vectorSearchProfile,
+                    VectorSearchProfileName = vectorSearchProfile
                 }
             },
             SemanticSearch = new()
@@ -149,7 +167,12 @@ public sealed partial class AzureSearchEmbedService(
                     {
                         ContentFields =
                         {
-                            new SemanticField("content")
+                            new SemanticField("content"),
+                            new SemanticField("category")
+                        },
+                        KeywordsFields =
+                        {
+                            new SemanticField("category")
                         }
                     })
                 }
