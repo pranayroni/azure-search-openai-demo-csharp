@@ -19,22 +19,26 @@
     <MudNavGroup Expanded Title="Chats" Icon="@Icons.Material.Filled.QuestionAnswer">
         <MudNavLink OnClick="AddNewChat"
                     Icon="@Icons.Material.Rounded.Add">
-                    New Chat
+                    Add New Chat
                 </MudNavLink>
         @foreach (var chat in ChatService.GetChatInstances())
         {
             <MudNavLink Href="@($"{chat.Id}/chat")" aria-label="Chat navigation option."
             Icon="@Icons.Material.Rounded.Chat">
-            @chat.Id
+            @chat.Name
         </MudNavLink>
         }
     </MudNavGroup>
    
 </MudNavMenu>
 @code {
+    private int chatCounter = 1;
     private void AddNewChat()
     {
-        ChatService.AddChatInstance(new ChatInstance());
+        ChatInstance chatInstance = new ChatInstance();
+        chatInstance.Name = $"Chat #{chatCounter}";
+        ChatService.AddChatInstance(chatInstance);
+        chatCounter++;
     }
 
     protected override void OnInitialized()
