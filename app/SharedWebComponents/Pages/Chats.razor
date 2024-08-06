@@ -1,7 +1,7 @@
 ﻿@page "/chats"
 @using System.Collections.Generic
 
-<button @onclick="AddNewChat">New Chat</button>
+<button @onclick="AddNewChat">Add New Chat</button>
 
 @foreach (var chat in chatInstances)
 {
@@ -10,9 +10,13 @@
 
 @code {
     private List<ChatInstance> chatInstances = new List<ChatInstance>();
+    private int chatCounter = 0;
 
     private void AddNewChat()
     {
-        chatInstances.Add(new ChatInstance());
+        ChatInstance chatInstance = new ChatInstance();
+        chatInstance.Name = $"New Chat {chatCounter}";
+        chatInstances.Add(chatInstance);
+        chatCounter++;
     }
 }
