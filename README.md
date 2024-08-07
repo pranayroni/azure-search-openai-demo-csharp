@@ -1,135 +1,51 @@
---- 
-page_type: sample
-languages: 
-- azdeveloper
-- csharp
-- html
-- bicep
-products:
-- ai-services
-- azure-blob-storage
-- azure-container-apps
-- azure-cognitive-search
-- azure-openai
-- aspnet-core
-- blazor
-- defender-for-cloud
-- azure-monitor
-- dotnet-maui
-urlFragment: azure-search-openai-demo-csharp
-name: ChatGPT + Enterprise data (csharp)
-description: A csharp sample app that chats with your data using OpenAI and AI Search.
----
-<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+# Document Bot Documentation
 
 ## Table of Contents
 
-- [Features](#features)
-- [Application Architecture](#application-architecture)
-- [Azure account requirements](#account-requirements)
-- [Getting Started](#getting-started)
-  - [Cost estimation](#cost-estimation)
-  - [Project setup](#project-setup)
-    - [GitHub Codespaces](#github-codespaces)
-    - [VS Code Dev Containers](#vs-code-remote-containers)
-    - [Local environment](#local-environment)
-  - [Deployment](#deployment)
-    - [Deploying from scratch](#deploying-from-scratch)
-    - [Deploying with existing Azure resources](#use-existing-resources)
-    - [Deploying again](#deploying-or-re-deploying-a-local-clone-of-the-repo)
-    - [Deploying App Spaces](#deploying-your-repo-using-app-spaces)
-    - [Running locally](#running-locally)
-    - [Sharing environments](#sharing-environments)
-    - [Clean up resources](#clean-up-resources)
-  - [Using the app](#using-the-app)
-- [Enabling optional features](#enabling-optional-features)
-  - [Enabling Application Insights](#enabling-optional-features)
-  - [Enabling authentication](#enabling-authentication)
-  - [Enable GPT-4V support](#enable-gpt-4v-support)
-- [Productionizing](#productionizing)
-- [Resources](#resources)
-- [FAQ](#faq)
+### 1. [Introduction](#introduction)
+### 2. [Deployment](#deployment)
+### 3. [Preparing Documents](#preparing-documents)
+### 4. [API](#api)
+### 5. [Usage](#usage)
 
-# ChatGPT +Enterprise data with Azure OpenAI and Cognitive Search (.NET)
+---
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Azure-Samples/azure-search-openai-demo-csharp/dotnet-build.yml?label=BUILD%20%26%20TEST&logo=github&style=for-the-badge)
-[![Open in GitHub - Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=624102171&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
-[![Open in Remote - Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/azure-search-openai-demo-csharp)
+## 1. Introduction
 
-This sample demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (`gpt-35-turbo`), and Azure AI Search for data indexing and retrieval.
+Welcome to Knipper's Document Bot. This project aims to provide a comprehensive solution for managing documents and interacting with the contained data through a chat-based interface.
+We use Retrieval Augmented Generation (RAG) to generate responses that are understandable within the context of the conversation, but also accurate with details from the provided documents.
 
-The repo includes sample data so it's ready to try end-to-end. In this sample application, we use a fictitious company called Contoso Electronics, and the experience allows its employees to ask questions about the benefits, internal policies, as well as job descriptions and roles.
+![RAG Architecture](./docs/appcomponents.png)
 
-![RAG Architecture](docs/appcomponents.png)
+Key features of the Document Bot include:
+- **Chat-Based Interaction**: Engage in conversations about documents, ask questions, and receive real-time responses.
+- **Document Upload and Deletion**: Easily upload and delete documents to the database directly through the website.
+- **Document Categorization and Filtering**: Label documents and tailor responses based on the requested documents.
+- **API Integration**: Integrate with external systems and services through a well-defined API.
 
-For more details on how this application was built, check this out:
+This documentation will guide you through the deployment, API usage, and general usage of the Document Bot. We hope you find this tool valuable and easy to use.
 
-- [Transform your business with smart .NET apps powered by Azure and ChatGPT blog post](https://aka.ms/build-dotnet-ai-blog)
-- [Build Intelligent Apps with .NET and Azure - Build Session](https://build.microsoft.com/sessions/f8f953f3-2e58-4535-92ae-5cb30ef2b9b0)
+---
 
-We want to hear from you! Are you interested in building or currently building intelligent apps? Take a few minutes to complete this survey.
+## 2. Deployment
 
-[**Take the survey**](https://aka.ms/dotnet-build-oai-survey)
-
-## Features
-
-- Voice Chat, Chat and Q&A interfaces
-- Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
-- Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
-- Settings directly in the UX to tweak the behavior and experiment with options
-
-![Chat screen](docs/chatscreen.png)
-
-## Application architecture
-
-- **User interface** - The application’s chat interface is a [Blazor WebAssembly](https://learn.microsoft.com/aspnet/core/blazor/) application. This interface is what accepts user queries, routes request to the application backend, and displays generated responses.
-- **Backend** - The application backend is an [ASP.NET Core Minimal API](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/overview). The backend hosts the Blazor static web application and what orchestrates the interactions among the different services. Services used in this application include:
-   - [**Azure AI Search**](https://learn.microsoft.com/azure/search/search-what-is-azure-search) – indexes documents from the data stored in an Azure Storage Account. This makes the documents searchable using [vector search](https://learn.microsoft.com/azure/search/search-get-started-vector) capabilities. 
-   - [**Azure OpenAI Service**](https://learn.microsoft.com/azure/ai-services/openai/overview) – provides the Large Language Models to generate responses. [Semantic Kernel](https://learn.microsoft.com/semantic-kernel/whatissk) is used in conjunction with the Azure OpenAI Service to orchestrate the more complex AI workflows.
-
-## Getting Started
-
-### Account Requirements
-
-In order to deploy and run this example, you'll need
+### 2.1. Prerequisites
+In order to deploy and run this project, you'll need
 
 - **Azure Account** - If you're new to Azure, get an [Azure account for free](https://aka.ms/free) and you'll get some free Azure credits to get started.
 - **Azure subscription with access enabled for the Azure OpenAI service** - [You can request access](https://aka.ms/oaiapply). You can also visit [the Cognitive Search docs](https://azure.microsoft.com/free/cognitive-search/) to get some free Azure credits to get you started.
 - **Azure account permissions** - Your Azure Account must have `Microsoft.Authorization/roleAssignments/write` permissions, such as [User Access Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator) or [Owner](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#owner).
+    - You may require additional permissions depending on the resources you are deploying.
 
+### 2.2. Deployment Options
+The Document Bot can be deployed using the following methods:
 
-> [!WARNING]<br>
-> By default this sample will create an Azure Container App, and Azure AI Search resource that have a monthly cost, as well as Form Recognizer resource that has cost per document page. You can switch them to free versions of each of them if you want to avoid this cost by changing the parameters file under the infra folder (though there are some limits to consider; for example, you can have up to 1 free Cognitive Search resource per subscription, and the free Form Recognizer resource only analyzes the first 2 pages of each document.)
-
-### Cost estimation
-
-Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage. However, you can try the [Azure pricing calculator](https://azure.microsoft.com/pricing/calculator/) for the resources below:
-
-- [**Azure Container Apps**](https://azure.microsoft.com/pricing/details/container-apps/)
-- [**Azure OpenAI Service**](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/)
-- [**Azure Form Recognizer**](https://azure.microsoft.com/pricing/details/form-recognizer/)
-- [**Azure AI Search**](https://azure.microsoft.com/pricing/details/search/)
-- [**Azure Blob Storage**](https://azure.microsoft.com/pricing/details/storage/blobs/)
-- [**Azure Monitor**](https://azure.microsoft.com/pricing/details/monitor/)
-
-### Project setup
-
-You have a few options for setting up this project. The easiest way to get started is GitHub Codespaces, since it will setup all the tools for you, but you can also set it up [locally](#local-environment) if desired.
-
-#### GitHub Codespaces
-
-You can run this repo virtually by using GitHub Codespaces, which will open a web-based VS Code in your browser:
-
-[![Open in GitHub - Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=624102171&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
-
-#### VS Code Remote Containers
-
-A related option is VS Code Remote Containers, which will open the project in your local VS Code using the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension:
-
-[![Open in Remote - Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/azure-search-openai-demo-csharp)
+#### GitHub Codespaces / VS Code Remote Containers
+- Run this repo virtually by using GitHub Codespaces, which will open a web-based VS Code in your browser.
+- Run this project in VS Code Remote Containers, which will open the project in your local VS Code using the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+- *If you don't have Docker, you will have to use either of these two virtual methods to run* ```azd up```.
 
 #### Local environment
-
 Install the following prerequisites:
 
 - [Azure Developer CLI](https://aka.ms/azure-dev/install)
@@ -151,7 +67,23 @@ Then, run the following commands to get the project on your local environment:
    1. Clone the repository or run `azd init -t azure-search-openai-demo-csharp`
    1. Run `azd env new azure-search-openai-demo-csharp`
 
-### Deployment
+### 2.3. Deployment Steps
+
+For a detailed Deployment guide, see the [Deployment Guide](./Deployment.md).
+
+#### Use existing resources
+***This method is reccommended for use at Knipper. Please request to be added to the*** ```rg-ai-knipper-docbot-csharp``` ***resource group, or an identical one.***
+
+If you have existing resources in Azure that you wish to use, you can configure `azd` to use those by setting the following `azd` environment variables:
+
+1. Run `azd env set AZURE_OPENAI_SERVICE {Name of existing OpenAI service}`
+1. Run `azd env set AZURE_OPENAI_RESOURCE_GROUP {Name of existing resource group that OpenAI service is provisioned to}`
+1. Run `azd env set AZURE_OPENAI_CHATGPT_DEPLOYMENT {Name of existing ChatGPT deployment}`. Only needed if your ChatGPT deployment is not the default 'chat'.
+1. Run `azd env set AZURE_OPENAI_EMBEDDING_DEPLOYMENT {Name of existing embedding model deployment}`. Only needed if your embedding model deployment is not the default `embedding`.
+1. Run `azd up`
+
+> [!NOTE]<br> 
+> You can also use existing Search and Storage Accounts. See `./infra/main.parameters.json` for list of environment variables to pass to `azd env set` to configure those existing resources.
 
 #### Deploying from scratch
 
@@ -165,29 +97,12 @@ Execute the following command, if you don't have any pre-existing Azure services
    - If you have access to multiple Azure subscriptions, you will be prompted to select the subscription you want to use. If you only have access to one subscription, it will be selected automatically.
 
    > **Note**<br>
-   > This application uses the `gpt-35-turbo` model. When choosing which region to deploy to, make sure they're available in that region (i.e. EastUS). For more information, see the [Azure OpenAI Service documentation](https://learn.microsoft.com/azure/cognitive-services/openai/concepts/models#gpt-35-models).
+   > This application uses the `gpt4o` model. When choosing which region to deploy to, make sure they're available in that region (i.e. EastUS). For more information, see the [Azure OpenAI Service documentation](https://learn.microsoft.com/azure/cognitive-services/openai/concepts/models#gpt-4o-and-gpt-4-turbo).
 
 1. After the application has been successfully deployed you will see a URL printed to the console. Click that URL to interact with the application in your browser.
 
-It will look like the following:
-
-!['Output from running azd up'](assets/endpoint.png)
-
 > [!NOTE]<br>
 > It may take a few minutes for the application to be fully deployed.
-
-#### Use existing resources
-
-If you have existing resources in Azure that you wish to use, you can configure `azd` to use those by setting the following `azd` environment variables:
-
-1. Run `azd env set AZURE_OPENAI_SERVICE {Name of existing OpenAI service}`
-1. Run `azd env set AZURE_OPENAI_RESOURCE_GROUP {Name of existing resource group that OpenAI service is provisioned to}`
-1. Run `azd env set AZURE_OPENAI_CHATGPT_DEPLOYMENT {Name of existing ChatGPT deployment}`. Only needed if your ChatGPT deployment is not the default 'chat'.
-1. Run `azd env set AZURE_OPENAI_EMBEDDING_DEPLOYMENT {Name of existing embedding model deployment}`. Only needed if your embedding model deployment is not the default `embedding`.
-1. Run `azd up`
-
-> [!NOTE]<br> 
-> You can also use existing Search and Storage Accounts. See `./infra/main.parameters.json` for list of environment variables to pass to `azd env set` to configure those existing resources.
 
 #### Deploying or re-deploying a local clone of the repo
 
@@ -235,11 +150,11 @@ If you have existing resources in Azure that you wish to use, you can configure 
 #### Running locally
 
 > [!IMPORTANT]<br>
-> Ensure Docker is running before running any `azd` provisioning / deployment commands.
+> Ensure Docker is running before running any `azd` provisioning / deployment commands. If you do not have docker, run with the .NET MAUI client.
 
 1. Run `azd auth login`
-1. After the application deploys, set the environment variable `AZURE_KEY_VAULT_ENDPOINT`. You can find the value in the _.azure/YOUR-ENVIRONMENT-NAME/.env_ file or the Azure portal.
-1. Run the following .NET CLI command to start the ASP.NET Core Minimal API server (client host):
+2. After the application deploys, set the environment variable `AZURE_KEY_VAULT_ENDPOINT`. You can find the value in the _.azure/YOUR-ENVIRONMENT-NAME/.env_ file or the Azure portal.
+3. Run the following .NET CLI command to start the ASP.NET Core Minimal API server (client host):
 
    ```dotnetcli
    dotnet run --project ./app/backend/MinimalApi.csproj --urls=http://localhost:7181/
@@ -253,11 +168,11 @@ This sample includes a .NET MAUI client, packaging the experience as an app that
 
 1. Open _app/app-maui.sln_ to open the solution that includes the MAUI client
 
-1. Edit _app/maui-blazor/MauiProgram.cs_, updating `client.BaseAddress` with the URL for the backend.
+2. Edit _app/maui-blazor/MauiProgram.cs_, updating `client.BaseAddress` with the URL for the backend.
 
    If it's running in Azure, use the URL for the service backend from the steps above. If running locally, use <http://localhost:7181>.
 
-1. Set **MauiBlazor** as the startup project and run the app
+3. Set **MauiBlazor** as the startup project and run the app
 
 #### Sharing Environments
 
@@ -272,97 +187,270 @@ Run the following if you want to give someone else access to the deployed and ex
 
 Run `azd down`
 
-### Using the app
+## 3. Preparing Documents
+### 3.1. Document Format
+The Document Bot is designed to work with PDF documents. When uploading documents, ensure they are in PDF format. 
+The Document Bot will extract text from these documents to generate responses to user queries.
+Currently, no other format of documents is supported.
 
-- In Azure: navigate to the Azure Container App deployed by `azd`. The URL is printed out when `azd` completes (as "Endpoint"), or you can find it in the Azure portal.
-- When running locally, navigate to <http://localhost:7181> for the client app and <http://localhost:7181/swagger> for the Open API server page.
+### 3.2. Document Upload
+To upload documents to the Document Bot in mass, use the PrepareDocs startup item. This will allow you to upload a large quantity of documents at once, with varying categories.
+This startup item runs a script that uploads all documents in the `data` folder to the database.
+Simply move all desired documents to the `data` folder and run the PrepareDocs startup item.
+If a document is already in the database, it will be skipped.
 
-Once in the web app:
+### 3.2.1. Database Creation
+When running the PrepareDocs startup item, the script will create a new knowledge base index if one does not already exist.
+We do not recommend running the PrepareDocs startup item to generate the knowledge base due to settings customization.
+Once documents are uploaded to the knowledge base, some settings may not be changed. 
+Below are examples of our knowledge base fields and semantic configuration.
+![Index Fields](./docs/index-fields.png)
+![Index Semantic Configurations](./docs/index-semantic-config.png)
 
-- On the **Voice Chat** page, select the voice settings dialog and configure text-to-speech preferences.
-  - You can either type messages to interact with Blazor Clippy, or select the Speak toggle button to use speech-to-text as your input.
-- Try different topics in **Chat** context. For chat, try follow up questions, clarifications, ask to simplify or elaborate on answer, etc.
-- Explore citations and sources
-- Click on the "settings" icon to try different options, tweak prompts, etc.
 
-## Enabling optional features
+### 3.2.2. Document Categories
+When uploading documents, you can assign one or more categories to each document. These categories are used to filter the documents that the chatbot searches through when generating responses.
+To assign categories when uploading through the PrepareDocs startup item, sort the documents into folders named after the category you wish to assign them. 
+The script will automatically assign the category based on the folder name.
+To add multiple categories to a document, you may use a nested folder structure. For example:
+```
+data
+|-- Business Rules
+|   |-- Document1.pdf
+|   |-- Document2.pdf
+|
+|-- Knipper
+    |-- HR
+    |   |-- Document3.pdf
+    |   |-- Document4.pdf
+    |
+    |-- Document5.pdf
+```
+### 3.3. Document Deletion
+To delete documents from the database using the PrepareDocs startup item, navigate to the `launchSettings.json` file in the `Properties` folder of the `PrepareDocs` project.
+In `launchSettings.json`, add the tag **--removeall** to the `commandLineArgs` string.
+The tag **--removeall** will delete all documents from the database, so use it with caution.
+To delete specific documents, add the tag **--remove** and move the documents you wish to delete into the `data` folder.
+This fuctionality has **NOT** been tested and may not work as intended.
 
-### Enabling Application Insights
+## 4. API
+### 4.1. Frontend API
+#### [url]:
+- **GET**: Returns the homepage of the Document Bot.
+#### [url]/authentication/login:
+- **GET**: Sends user to sign in portal with their Microsoft account.
+#### [url]/user:
+- **GET**: Returns the user's profile information.
+#### [url]/documents:
+- **GET**: Returns all documents in the database.
+#### [url]/[chatId]/chat:
+- **GET**: Returns the page displaying the chat history assigned to chatId.
 
-To enable Application Insights and the tracing of each request, along with the logging of errors, set the `AZURE_USE_APPLICATION_INSIGHTS` variable to true before running `azd up`
-
-1. Run `azd env set AZURE_USE_APPLICATION_INSIGHTS true`
-1. Run `azd up`
-
-To see the performance data, go to the Application Insights resource in your resource group, click on the "Investigate -> Performance" blade and navigate to any HTTP request to see the timing data.
-To inspect the performance of chat requests, use the "Drill into Samples" button to see end-to-end traces of all the API calls made for any chat request:
-
-![Tracing screenshot](docs/transaction-tracing.png)
-
-To see any exceptions and server errors, navigate to the "Investigate -> Failures" blade and use the filtering tools to locate a specific exception. You can see Python stack traces on the right-hand side.
-
-### Enabling authentication
-
-By default, the deployed Azure container app will have no authentication or access restrictions enabled, meaning anyone with routable network access to the container app can chat with your indexed data.  You can require authentication to your Azure Active Directory by following the [Add container app authentication](https://learn.microsoft.com/azure/container-apps/authentication-azure-active-directory) tutorial and set it up against the deployed container app.
-
-To then limit access to a specific set of users or groups, you can follow the steps from [Restrict your Azure AD app to a set of users](https://learn.microsoft.com/azure/active-directory/develop/howto-restrict-your-app-to-a-set-of-users) by changing "Assignment Required?" option under the Enterprise Application, and then assigning users/groups access.  Users not granted explicit access will receive the error message -AADSTS50105: Your administrator has configured the application <app_name> to block users unless they are specifically granted ('assigned') access to the application.-
-
-### Enable GPT-4V support
-
-With GPT-4-vision-preview(GPT-4V), it's possible to support an enrichmented retrival augmented generation by providing both text and image as source content. To enable GPT-4V support, you need to enable `USE_VISION` and use `GPT-4V` model when provisioning.
-
-> [!NOTE]
-> You would need to re-indexing supporting material and re-deploy the application after enabling GPT-4V support if you have already deployed the application before. This is because enabling GPT-4V support requires new fields to be added to the search index.
-
-To enable GPT-4V support with Azure OpenAI Service, run the following commands:
-```bash
-azd env set USE_VISION true
-azd env set USE_AOAI true
-azd env set AZURE_OPENAI_CHATGPT_MODEL_NAME gpt-4
-azd env set AZURE_OPENAI_RESOURCE_LOCATION westus # gpt-4-vision-preview is only available in a few regions. Please check the model availability for more details.
-azd up
+### 4.2. Backend API
+All Backend API endpoints are prefixed with `/api`. They are called by the frontend through `ApiClient.cs` and are used to interact with the backend services. They are defined in `WebApplicationExtensions.cs`.
+#### [url]/api/username:
+- **GET**: *This endpoint is not complete. It is set up to be a framework for user preferences later.*
+#### [url]/api/documents:
+- **GET**: Retrieves all documents from the database.
+    - This response will be extremely large as it contains every document blob in storage.
+    - Example Response:
+```
+[
+    {
+        "name":"2021 Remote Work Pilot (Update Nov 2021)-0.pdf",
+        "contentType":"application/pdf",
+        "size":87601,
+        "lastModified":"2024-07-23T13:50:57+00:00",
+        "url":"https://{storage_container_name}.blob.core.windows.net:443/content/2021%20Remote%20Work%20Pilot%20(Update%20Nov%202021)-0.pdf",
+        "status":0,
+        "embeddingType":0
+    },
+    { ... }
+]
+```
+- **POST**: Uploads new documents to the database.
+    - Example Request:
+        - The actual file content is sent as binary data in a multipart form-data request.
+        - `category` is a list of categories, delimited by commas.
+```
+{
+  "files": [
+    { ... },
+    { ... }
+  ],
+  "maxAllowedSize": 10,
+  "cookie": "example-csrf-token",
+  "category": "example-category",
+  "cancellationToken": "cancellation-token-placeholder"
+}
+```
+- Example Response:
+```
+{
+  "success": true,
+  "message": "Files uploaded successfully."
+}
+```
+#### [url]/api/chat:
+- **POST**: Sends the lastest chat along with the chat history to generate a response. 
+Citations are marked in square brackets [] and follow-up questions are marked in <<>>.
+    - Example Request:
 ```
 
-To enable GPT-4V support with OpenAI, run the following commands:
-```bash
-azd env set USE_VISION true
-azd env set USE_AOAI false
-azd env set OPENAI_CHATGPT_DEPLOYMENT gpt-4-vision-preview
-azd up
+{
+    "messages":
+    [   
+        {
+            "role":"user",
+            "content":"How often does the Quality Council meet?",
+            "isUser":true
+        },
+        {
+            "role":"assistant",
+            "content":"The Quality Council meets at least monthly.... [QA-021-1.pdf]",
+            "isUser":false
+        },
+        {
+            "role":"user",
+            "content":"Who are the members of the Quality Council?",
+            "isUser":true
+        }
+    ],
+    "overrides":
+    {
+        "semantic_ranker":true,
+        "retrieval_mode":"Hybrid",
+        "semantic_captions":false,
+        "exclude_category":[],
+        "top":5,
+        "temperature":null,
+        "prompt_template":null,
+        "prompt_template_prefix":null,
+        "prompt_template_suffix":null,
+        "suggest_followup_questions":true,
+        "use_gpt4v":false,
+        "use_oid_security_filter":false,
+        "use_groups_security_filter":false,
+        "vector_fields":false},
+        "lastUserQuestion":"Who are the members of the Quality Council?",
+        "approach":0
+    }
+}
 ```
+ - Example Response:
+ ```
+ {
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "The Quality Council is a cross-functional team ... [QA-045-15.pdf]. Departments include ... [QA-021-2.pdf]. <<What are the main responsibilities of the Quality Council?>>  <<...>> "
+            },
+            "context": {
+                "dataPointsContent": [
+                    {
+                        "title": "QA-021-0.pdf",
+                        "content": "of this procedure is ..."
+                    },
+                    { ... }
+                ],
+                "dataPointsImages": null,
+                "followup_questions": [
+                    "What are the main responsibilities of the Quality Council?",
+                    "..."
+                ],
+                "thoughts": [
+                    {
+                        "title": "Thoughts",
+                        "description": "I utilized multiple sources ...",
+                        "props": null
+                    }
+                ],
+                "data_points": {
+                    "text": [
+                        "QA-021-0.pdf: of this procedure is ...",
+                        "QA-021-1.pdf:  Those in attendance ...",
+                        "foo.pdf: ..."
+                    ]
+                },
+                "thoughtsString": "Thoughts: I utilized multiple sources ..."
+            },
+            "citationBaseUrl": "https://{storage_container_name}.blob.core.windows.net/content",
+            "content_filter_results": null
+        }
+    ]
+}
+ ```
 
-To clean up previously deployed resources, run the following command:
-```bash
-azd down --purge
-azd env set AZD_PREPDOCS_RAN false # This is to ensure that the documents are re-indexed with the new fields.
+#### [url]/api/categories:
+- **GET**: Retrieves a list of all categories given to documents.
+- Example Response:
 ```
-## Productionizing
+[
+    "Business Rules",
+    "Client",
+    "Knipper",
+    ...
+]
+```
+#### [url]/api/delete/blobs:
+- **POST**: Deletes a document from the blob storage.
+    - Example Request:
+```
+{
+    "file":"2024 Holiday Schedule.pdf"
+}
+```
+#### [url]/api/delete/embeddings:
+- **POST**: Deletes a document's embeddings from the knowledge base.
+```
+{
+    "file":"2024 Holiday Schedule.pdf"
+}
+```
+#### [url]/api/sourcefiles:
+- **POST**: When given a list of document blob names, retrieves the respective links.
+    - Example Request:
+```
+{
+    "FileNames": 
+    [
+        "Current Handbook as of 3-12-2014-0.pdf", 
+        "Current Handbook as of 3-12-2014-1.pdf"
+    ]
+}
+```
+    - Example Response:
+```
+[
+    "https://{storage_container_name}.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-0.pdf",
+    "https://{storage_container_name}.blob.core.windows.net/content/Current%20Handbook%20as%20of%203-12-2014-1.pdf"
+]
+``` 
 
-This sample is designed to be a starting point for your own production application,
-but you should do a thorough review of the security and performance before deploying
-to production. Here are some things to consider:
+## 5. Usage
+### 5.1. Logging In
+To ensure only authorized Knipper employees can use Document Bot, you must first log in with your Microsoft account. This is done by clicking the "Log In" button on the homepage and following the prompts to sign in with your Microsoft account.
+### 5.2. Documents
+On this page, you can view all documents in the database, search for specific documents, upload new documents, and delete existing documents. Documents are shown not as wholes, but as individual pages.
 
-* **OpenAI Capacity**: The default TPM (tokens per minute) is set to 30K. That is equivalent to approximately 30 conversations per minute (assuming 1K per user message/response). You can increase the capacity by changing the `chatGptDeploymentCapacity` and `embeddingDeploymentCapacity` parameters in `infra/main.bicep` to your account's maximum capacity. You can also view the Quotas tab in [Azure OpenAI studio](https://oai.azure.com/) to understand how much capacity you have.
-* **Azure Storage**: The default storage account uses the `Standard_LRS` SKU. To improve your resiliency, we recommend using `Standard_ZRS` for production deployments, which you can specify using the `sku` property under the `storage` module in `infra/main.bicep`.
-* **Azure AI Search**: If you see errors about search service capacity being exceeded, you may find it helpful to increase the number of replicas by changing `replicaCount` in `infra/core/search/search-services.bicep` or manually scaling it from the Azure Portal.
-* **Azure Container Apps**: By default, this application deploys containers with 0.5 CPU Cores and 1GB of memory. The minimum replicas is 1 and maximum 10. For this app, you can set values such as `containerCpuCoreCount`, `containerMaxReplicas `, `containerMemory`, `containerMinReplicas` in the `infra/core/host/container-app.bicep` file to fit your needs. You can use auto-scaling rules or scheduled scaling rules, and scale up the [maximum/minimum](https://learn.microsoft.com/azure/container-apps/scale-app) based on load.
-* **Authentication**: By default, the deployed app is publicly accessible. We recommend restricting access to authenticated users. See [Enabling authentication](#enabling-authentication) above for how to enable authentication.
-* **Networking**: We recommend deploying inside a Virtual Network. If the app is only for internal enterprise use, use a private DNS zone. Also consider using Azure API Management (APIM) for firewalls and other forms of protection. For more details, read [Azure OpenAI Landing Zone reference architecture](https://techcommunity.microsoft.com/t5/azure-architecture-blog/azure-openai-landing-zone-reference-architecture/ba-p/3882102).
-* **Loadtesting**: We recommend running a loadtest for your expected number of users.
+***Both Uploading and Deletion occur within the scope of the session. You may switch to other pages within the site, but do not close the tab until uploading or deletion is complete in order to prevent errors in the database.***
 
-## Resources
-
-- [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
-- [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
-- [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
-- [`Azure.AI.OpenAI` NuGet package](https://www.nuget.org/packages/Azure.AI.OpenAI)
-- [Original Blazor App](https://github.com/IEvangelist/blazor-azure-openai)
-
-> [!NOTE]<br>
-> The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.
-
-### FAQ
-
-**_Question_**: Why do we need to break up the PDFs into chunks when Azure AI Search supports searching large documents?
-
-**_Answer_**: Chunking allows us to limit the amount of information we send to OpenAI due to token limits. By breaking up the content, it allows us to easily find potential chunks of text that we can inject into OpenAI. The method of chunking we use leverages a sliding window of text such that sentences that end one chunk will start the next. This allows us to reduce the chance of losing the context of the text.
+### 5.2.1. Uploading Documents
+You can upload documents through the Documents page. Simply select the files you wish to upload, label them with one or more categories, and click "Upload". 
+Up to 10 documents can be uploaded at once. All the uploaded documents in the same batch will be labeled with the same categories. 
+This process may take a few minutes based on the number and size of documents being uploaded.
+When labeling documents, you can search for existing categories through the Multi-Select Autocomplete. To create new categories, you can type in the category name and press enter.
+### 5.2.2. Deleting Documents
+To delete a document, click the trash icon next to the document you wish to delete. Despite the documents being displayed as pages, this action does not delete only that page.
+Deletion will delete all pages of the document selected. 
+### 5.3. Chat
+To chat, press the "New Chat" button to create a new instance of a chat. You can ask it questions about the documents and it will search the database for an answer.
+If no relevant documents are found, the chat search the internet for an answer. 
+Each chat instance maintains its own chat history and can be accessed by clicking on the chat instance in the chat list. 
+Chats will only take into account the chat history of the specific instance they are part of when generating responses.
+You can exclude categories of documents from your chat responses by searching them in the Multi-Select Autocomplete.
+### 5.4. Profile
+The profile page displays your Microsoft account information. This page is not currently used for any functionality, but may be used in the future for account management.
+You may find your auth token to be used in the API here, as well as other information for debugging purposes.
