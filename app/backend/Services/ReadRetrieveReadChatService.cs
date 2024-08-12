@@ -157,7 +157,7 @@ public class ReadRetrieveReadChatService
             "You are an AI assistant helps Knipper employees with questions about the employee handbook " +
             "and other documents such as Standard Operation Procedures and business rules with client companies. " +
             "Answer only with the facts listed in the provided sources. " +
-            "If you cannot find the answer in the sources, reply with 'I don't know.'. " +
+            "If you cannot find the answer in the sources, reply ONLY with 'I don't know.'. " +
             "If asking a clarifying question to the user would help, ask the question. " +
             "For tabular information return it as an html table. Do not return markdown format. " +
             "If the question is not in English, answer in the language used in the question.");
@@ -234,7 +234,7 @@ You answer needs to be a json object with the following format.
             ans = answerObject.GetProperty("answer").GetString() ?? throw new InvalidOperationException("Failed to get answer");
             thoughts = answerObject.GetProperty("thoughts").GetString() ?? throw new InvalidOperationException("Failed to get thoughts");
             Console.WriteLine("ans = "+ans);
-            if(ans == "I don't know.")
+            if(ans.Contains("I don't know."))
             {
                 Console.WriteLine("Entered I don't know branch");
                 var deploymentId = "chat4o";
