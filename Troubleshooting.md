@@ -37,3 +37,8 @@ If your goal is only to make changes to the backend, you can run the MinimalAPI 
 ### Azure Search CORS
 Ensure that your Azure Search service has CORS enabled and allows connections from services that require the API like the URL for the Web App. If unsure, use `*` to accept all incoming connections.
 
+### Prepdocs script not running
+Ensure that your user has execute permissions for the script. You can check by running `ls -ld` and checking if the last character has an 'x'.
+
+If you are unsure or don't have executable permission for the file, run `chmod a+x [path to script]` to change the file permission and make it executable.
+
