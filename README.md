@@ -223,6 +223,9 @@ The tag **--removeall** will delete all documents from the database, so use it w
 To delete specific documents, add the tag **--remove** and move the documents you wish to delete into the `data` folder.
 This fuctionality has **NOT** been tested and may not work as intended.
 
+### 3.4. Prepdocs Troubleshooting
+We have specific details in [Prepdocs.md](./Prepdocs.md) as well as some general information in [Troubleshooting.md](./Troubleshooting.md)
+
 ## 4. API
 ### 4.1. Frontend API
 #### [url]:
