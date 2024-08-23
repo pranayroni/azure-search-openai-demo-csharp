@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-### 1. [Introduction](##Introduction)
+### 1. [Introduction](#introduction)
 ### 2. [Deployment](#deployment)
 ### 3. [Preparing Documents](#preparing-documents)
 ### 4. [API](#api)
@@ -10,7 +10,7 @@
 
 ---
 
-## Introduction
+## 1. Introduction
 
 Welcome to Knipper's Document Bot. This project aims to provide a comprehensive solution for managing documents and interacting with the contained data through a chat-based interface.
 We use Retrieval Augmented Generation (RAG) to generate responses that are understandable within the context of the conversation, but also accurate with details from the provided documents.
