@@ -1,15 +1,5 @@
 # Document Bot Documentation
 
-## Table of Contents
-
-### 1. [Introduction](#introduction)
-### 2. [Deployment](#deployment)
-### 3. [Preparing Documents](#preparing-documents)
-### 4. [API](#api)
-### 5. [Usage](#usage)
-
----
-
 ## 1. Introduction
 
 Welcome to Knipper's Document Bot. This project aims to provide a comprehensive solution for managing documents and interacting with the contained data through a chat-based interface.
